@@ -1,0 +1,9 @@
+2025-08-17 20:08:10,579 - INFO - context_portal_mcp.main - File logging configured to: /home/bencan/projects/canvasCheckerBot/context_portal/./logs/conport.log
+2025-08-17 20:08:10,579 - INFO - context_portal_mcp.main - Parsed CLI args: Namespace(host='127.0.0.1', port=8000, workspace_id='/home/bencan/projects/canvasCheckerBot', mode='stdio', log_file='./logs/conport.log', log_level='INFO')
+2025-08-17 20:08:10,579 - INFO - context_portal_mcp.main - Starting ConPort in STDIO mode using FastMCP for initial CLI arg workspace_id: /home/bencan/projects/canvasCheckerBot
+2025-08-17 20:08:10,579 - INFO - context_portal_mcp.main - Pre-warming database connection for workspace: /home/bencan/projects/canvasCheckerBot
+2025-08-17 20:08:10,579 - INFO - context_portal_mcp.db.database - Alembic.ini not found. Creating at /home/bencan/projects/canvasCheckerBot/context_portal/alembic.ini
+2025-08-17 20:08:10,580 - INFO - context_portal_mcp.db.database - Alembic env.py not found. Creating at /home/bencan/projects/canvasCheckerBot/context_portal/alembic/env.py
+2025-08-17 20:08:10,580 - INFO - context_portal_mcp.db.database - Initial schema not found. Creating at /home/bencan/projects/canvasCheckerBot/context_portal/alembic/versions/2025_06_17_initial_schema.py
+2025-08-17 20:08:10,580 - INFO - context_portal_mcp.db.database - Alembic: Script directory /home/bencan/projects/canvasCheckerBot/context_portal/alembic confirmed to exist by Python.
+2025-08-17 20:08:10,580 - INFO - context_portal_mcp.db.database - Running Alembic migrations for database: /home/bencan/projects/canvasCheckerBot/context_portal/context.db
