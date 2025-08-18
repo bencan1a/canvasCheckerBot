@@ -38,10 +38,10 @@ services:
     container_name: canvasbot-vllm
     ports:
       - "0.0.0.0:8000:8000"
-    command: ["--model", "${VLLM_MODEL:-Qwen/Qwen2.5-32B-Instruct-AWQ}", "--trust-remote-code", "--tensor-parallel-size", "${VLLM_GPU_COUNT:-1}", "--max-model-len", "${VLLM_MAX_LENGTH:-10176}"]
+    command: ["--model", "${VLLM_MODEL:-Qwen/Qwen2.5-32B-Instruct-AWQ}", "--trust-remote-code", "--tensor-parallel-size", "${VLLM_GPU_COUNT:-2}", "--max-model-len", "${VLLM_MAX_LENGTH:-10176}"]
     environment:
       - MODEL_NAME=${VLLM_MODEL:-Qwen/Qwen2.5-32B-Instruct-AWQ}
-      - TENSOR_PARALLEL_SIZE=${VLLM_GPU_COUNT:-1}
+      - TENSOR_PARALLEL_SIZE=${VLLM_GPU_COUNT:-2}
       - MAX_MODEL_LEN=${VLLM_MAX_LENGTH:-10176}
       - TRUST_REMOTE_CODE=true
     volumes:
@@ -61,7 +61,7 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              count: all
+              device_ids: ['0', '1']
               capabilities: [gpu]
 
   # Ollama for Embeddings Only
@@ -69,7 +69,7 @@ services:
     image: ollama/ollama:latest
     container_name: canvasbot-embeddings
     ports:
-      - "11434:11434"
+      - "11435:11434"
     volumes:
       - ollama_data:/root/.ollama
     environment:
@@ -82,6 +82,13 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['2']
+              capabilities: [gpu]
 
   # CanvasBot Chat Interface (Oobabooga)
   oobabooga:

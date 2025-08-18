@@ -1,7 +1,8 @@
 import { spawn, ChildProcess } from 'child_process';
 import axios from 'axios';
 import { Ollama } from 'ollama';
-import { SimpleVectorStore as VectorStore, SearchResult } from './simple-vector-store.js';
+import { SimpleVectorStore, SearchResult } from './simple-vector-store.js';
+import { CachedVectorStore, CachedVectorStoreConfig } from './cached-vector-store.js';
 import { DataPreprocessor } from './data-preprocessor.js';
 import { StudentData } from '../types.js';
 import { parseISO, addDays, startOfDay, endOfDay } from 'date-fns';
@@ -19,23 +20,58 @@ export interface VLLMConfig {
   gpuId?: number;
 }
 
+export interface HybridQueryEngineConfig {
+  enableRamCache?: boolean;
+  ramCacheConfig?: Partial<CachedVectorStoreConfig>;
+  fallbackToSimple?: boolean;
+}
+
 export class HybridQueryEngine {
   private ollama: Ollama;
-  private vectorStore: VectorStore;
+  private vectorStore: CachedVectorStore | SimpleVectorStore;
   private preprocessor: DataPreprocessor;
   private vllmConfig: VLLMConfig;
   private vllmProcess: ChildProcess | null = null;
   private vllmBaseUrl: string;
   private studentData: StudentData | null = null;
+  private config: HybridQueryEngineConfig;
 
   constructor(
     vllmConfig: VLLMConfig,
-    embeddingModel: string = 'nomic-embed-text'
+    embeddingModel: string = 'nomic-embed-text',
+    config: HybridQueryEngineConfig = {}
   ) {
     this.ollama = new Ollama({
       host: 'http://localhost:11434'
     });
-    this.vectorStore = new VectorStore(embeddingModel);
+    
+    this.config = {
+      enableRamCache: true, // Default to high-performance mode
+      fallbackToSimple: true,
+      ramCacheConfig: {
+        embeddingModel,
+        ramCache: {
+          maxMemoryGB: 128,
+          cacheStrategy: 'LRU',
+          indexType: 'FLAT',
+          embeddingDimensions: 768
+        },
+        fallbackToSimple: true,
+        preloadStrategy: 'background',
+        warmupEnabled: true
+      },
+      ...config
+    };
+
+    // Initialize high-performance vector store with RAM cache or fallback to simple store
+    if (this.config.enableRamCache) {
+      console.log('🚀 Initializing high-performance CachedVectorStore with 128GB RAM cache');
+      this.vectorStore = new CachedVectorStore(this.config.ramCacheConfig);
+    } else {
+      console.log('📦 Using lightweight SimpleVectorStore');
+      this.vectorStore = new SimpleVectorStore(embeddingModel);
+    }
+    
     this.preprocessor = new DataPreprocessor();
     this.vllmConfig = {
       host: 'localhost',
@@ -334,6 +370,115 @@ ANSWER:`;
       this.vllmProcess.kill();
       this.vllmProcess = null;
       console.log(`vLLM server on GPU ${this.vllmConfig.gpuId} stopped`);
+    }
+  }
+
+  /**
+   * Get comprehensive performance statistics from the vector store
+   */
+  getPerformanceStats(): any {
+    if (this.vectorStore instanceof CachedVectorStore) {
+      return {
+        type: 'CachedVectorStore',
+        ramCacheEnabled: true,
+        stats: this.vectorStore.getPerformanceStats(),
+        memoryUsage: this.vectorStore.getMemoryUsage(),
+        performanceMetrics: this.vectorStore.getPerformanceMetrics()
+      };
+    } else {
+      return {
+        type: 'SimpleVectorStore',
+        ramCacheEnabled: false,
+        message: 'Using lightweight SimpleVectorStore - enable RAM cache for performance metrics'
+      };
+    }
+  }
+
+  /**
+   * Optimize the vector store cache for improved performance
+   */
+  async optimizeVectorStore(): Promise<void> {
+    if (this.vectorStore instanceof CachedVectorStore) {
+      console.log('🔧 Optimizing RAM vector cache...');
+      await this.vectorStore.optimizeCache();
+      console.log('✅ Cache optimization completed');
+    } else {
+      console.log('📦 SimpleVectorStore - no optimization available. Enable RAM cache for optimization features.');
+    }
+  }
+
+  /**
+   * Force warmup of the vector store for optimal performance
+   */
+  async warmupVectorStore(): Promise<void> {
+    if (this.vectorStore instanceof CachedVectorStore) {
+      console.log('🔥 Starting vector store warmup...');
+      await this.vectorStore.forceWarmup();
+      console.log('✅ Vector store warmup completed');
+    } else {
+      console.log('📦 SimpleVectorStore - no warmup required');
+    }
+  }
+
+  /**
+   * Wait for all background operations to complete
+   */
+  async waitForBackgroundTasks(): Promise<void> {
+    if (this.vectorStore instanceof CachedVectorStore) {
+      await this.vectorStore.waitForBackgroundTasks();
+    }
+  }
+
+  /**
+   * Enable or disable RAM cache at runtime (requires reinitialization)
+   */
+  setRamCacheEnabled(enabled: boolean): void {
+    this.config.enableRamCache = enabled;
+    console.log(`🔧 RAM cache ${enabled ? 'enabled' : 'disabled'} - reinitialize to apply changes`);
+  }
+
+  /**
+   * Get current configuration status
+   */
+  getConfig(): HybridQueryEngineConfig & { currentVectorStoreType: string } {
+    return {
+      ...this.config,
+      currentVectorStoreType: this.vectorStore instanceof CachedVectorStore ? 'CachedVectorStore' : 'SimpleVectorStore'
+    };
+  }
+
+  /**
+   * Reset the vector store and clear all cached data
+   */
+  async resetVectorStore(): Promise<void> {
+    console.log('🔄 Resetting vector store...');
+    
+    if (this.vectorStore instanceof CachedVectorStore) {
+      await this.vectorStore.reset();
+    } else {
+      await this.vectorStore.reset();
+    }
+    
+    console.log('✅ Vector store reset completed');
+  }
+
+  /**
+   * Get detailed memory usage information
+   */
+  getMemoryUsage(): any {
+    if (this.vectorStore instanceof CachedVectorStore) {
+      const usage = this.vectorStore.getMemoryUsage();
+      return {
+        ...usage,
+        ramCacheEnabled: true,
+        targetMemoryGB: this.config.ramCacheConfig?.ramCache?.maxMemoryGB || 128
+      };
+    } else {
+      return {
+        ramCacheEnabled: false,
+        estimatedMemoryMB: '<10',
+        message: 'SimpleVectorStore uses minimal memory - enable RAM cache for detailed usage statistics'
+      };
     }
   }
 }
