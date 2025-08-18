@@ -42,9 +42,9 @@ interface MemoryRegion {
 export class RamVectorCache {
   private config: RamCacheConfig;
   private documents: Map<string, CachedDocument> = new Map();
-  private memory: MemoryRegion;
-  private vectorView: Float32Array;
-  private metadataView: Uint8Array;
+  private memory!: MemoryRegion;
+  private vectorView!: Float32Array;
+  private metadataView!: Uint8Array;
   private lruHead: string | null = null;
   private lruTail: string | null = null;
   private lruMap: Map<string, { prev: string | null; next: string | null }> = new Map();

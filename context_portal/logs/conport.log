@@ -31,3 +31,21 @@
 2025-08-17 21:40:46,379 - INFO - context_portal_mcp.main - Pre-warming database connection for workspace: /home/bencan/projects/canvasCheckerBot
 2025-08-17 21:40:46,380 - INFO - context_portal_mcp.db.database - Alembic: Script directory /home/bencan/projects/canvasCheckerBot/context_portal/alembic confirmed to exist by Python.
 2025-08-17 21:40:46,380 - INFO - context_portal_mcp.db.database - Running Alembic migrations for database: /home/bencan/projects/canvasCheckerBot/context_portal/context.db
+2025-08-18 06:34:16,313 - INFO - context_portal_mcp.main - File logging configured to: /home/bencan/projects/canvasCheckerBot/context_portal/./logs/conport.log
+2025-08-18 06:34:16,313 - INFO - context_portal_mcp.main - Parsed CLI args: Namespace(host='127.0.0.1', port=8000, workspace_id='/home/bencan/projects/canvasCheckerBot', mode='stdio', log_file='./logs/conport.log', log_level='INFO')
+2025-08-18 06:34:16,313 - INFO - context_portal_mcp.main - Starting ConPort in STDIO mode using FastMCP for initial CLI arg workspace_id: /home/bencan/projects/canvasCheckerBot
+2025-08-18 06:34:16,313 - INFO - context_portal_mcp.main - Pre-warming database connection for workspace: /home/bencan/projects/canvasCheckerBot
+2025-08-18 06:34:16,314 - INFO - context_portal_mcp.db.database - Alembic: Script directory /home/bencan/projects/canvasCheckerBot/context_portal/alembic confirmed to exist by Python.
+2025-08-18 06:34:16,314 - INFO - context_portal_mcp.db.database - Running Alembic migrations for database: /home/bencan/projects/canvasCheckerBot/context_portal/context.db
+2025-08-18 14:48:28,178 - INFO - context_portal_mcp.main - File logging configured to: /home/bencan/projects/canvasCheckerBot/context_portal/./logs/conport.log
+2025-08-18 14:48:28,178 - INFO - context_portal_mcp.main - Parsed CLI args: Namespace(host='127.0.0.1', port=8000, workspace_id='/home/bencan/projects/canvasCheckerBot', mode='stdio', log_file='./logs/conport.log', log_level='INFO')
+2025-08-18 14:48:28,178 - INFO - context_portal_mcp.main - Starting ConPort in STDIO mode using FastMCP for initial CLI arg workspace_id: /home/bencan/projects/canvasCheckerBot
+2025-08-18 14:48:28,178 - INFO - context_portal_mcp.main - Pre-warming database connection for workspace: /home/bencan/projects/canvasCheckerBot
+2025-08-18 14:48:28,178 - INFO - context_portal_mcp.db.database - Alembic: Script directory /home/bencan/projects/canvasCheckerBot/context_portal/alembic confirmed to exist by Python.
+2025-08-18 14:48:28,178 - INFO - context_portal_mcp.db.database - Running Alembic migrations for database: /home/bencan/projects/canvasCheckerBot/context_portal/context.db
+2025-08-18 14:53:38,700 - INFO - context_portal_mcp.main - File logging configured to: /home/bencan/projects/canvasCheckerBot/context_portal/./logs/conport.log
+2025-08-18 14:53:38,700 - INFO - context_portal_mcp.main - Parsed CLI args: Namespace(host='127.0.0.1', port=8000, workspace_id='/home/bencan/projects/canvasCheckerBot', mode='stdio', log_file='./logs/conport.log', log_level='INFO')
+2025-08-18 14:53:38,700 - INFO - context_portal_mcp.main - Starting ConPort in STDIO mode using FastMCP for initial CLI arg workspace_id: /home/bencan/projects/canvasCheckerBot
+2025-08-18 14:53:38,700 - INFO - context_portal_mcp.main - Pre-warming database connection for workspace: /home/bencan/projects/canvasCheckerBot
+2025-08-18 14:53:38,701 - INFO - context_portal_mcp.db.database - Alembic: Script directory /home/bencan/projects/canvasCheckerBot/context_portal/alembic confirmed to exist by Python.
+2025-08-18 14:53:38,701 - INFO - context_portal_mcp.db.database - Running Alembic migrations for database: /home/bencan/projects/canvasCheckerBot/context_portal/context.db

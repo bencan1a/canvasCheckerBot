@@ -38,10 +38,10 @@ services:
     container_name: canvasbot-vllm
     ports:
       - "0.0.0.0:8000:8000"
-    command: ["--model", "${VLLM_MODEL:-Qwen/Qwen2.5-32B-Instruct-AWQ}", "--trust-remote-code", "--tensor-parallel-size", "${VLLM_GPU_COUNT:-2}", "--max-model-len", "${VLLM_MAX_LENGTH:-10176}"]
+    command: ["--model", "${VLLM_MODEL:-Qwen/Qwen2.5-32B-Instruct-AWQ}", "--trust-remote-code", "--tensor-parallel-size", "${VLLM_GPU_COUNT:-1}", "--max-model-len", "${VLLM_MAX_LENGTH:-10176}"]
     environment:
       - MODEL_NAME=${VLLM_MODEL:-Qwen/Qwen2.5-32B-Instruct-AWQ}
-      - TENSOR_PARALLEL_SIZE=${VLLM_GPU_COUNT:-2}
+      - TENSOR_PARALLEL_SIZE=${VLLM_GPU_COUNT:-1}
       - MAX_MODEL_LEN=${VLLM_MAX_LENGTH:-10176}
       - TRUST_REMOTE_CODE=true
     volumes:
@@ -61,7 +61,7 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              device_ids: ['0', '1']
+              device_ids: ['0']
               capabilities: [gpu]
 
   # Ollama for Embeddings Only
@@ -78,7 +78,7 @@ services:
     networks:
       - canvasbot-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      test: ["CMD", "ollama", "list"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -129,6 +129,12 @@ services:
       - OLLAMA_BASE_URL=http://ollama:11434
       - OPENAI_API_BASE_URL=http://canvasbot:3001/v1
       - OPENAI_API_KEY=canvasbot-key
+      # Authentication Configuration
+      - WEBUI_AUTH=${WEBUI_AUTH:-true}
+      - WEBUI_SECRET_KEY=${WEBUI_SECRET_KEY:-canvasbot-secret-key}
+      # Development Settings
+      - ENABLE_SIGNUP=${ENABLE_SIGNUP:-true}
+      - DEFAULT_USER_ROLE=${DEFAULT_USER_ROLE:-user}
     volumes:
       - open_webui_data:/app/backend/data
     restart: unless-stopped
