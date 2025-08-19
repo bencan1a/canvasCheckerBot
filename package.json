@@ -23,7 +23,10 @@
     "setup": "npm run build && docker-compose build",
     "setup:models": "docker-compose exec ollama ollama pull nomic-embed-text",
     "lint": "eslint src/**/*.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "jest --config jest.config.cjs",
+    "test:watch": "jest --config jest.config.cjs --watch",
+    "test:coverage": "jest --config jest.config.cjs --coverage"
   },
   "dependencies": {
     "@inquirer/prompts": "^3.0.0",
@@ -47,11 +50,13 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/inquirer": "^9.0.0",
+    "@types/jest": "^30.0.0",
     "@types/morgan": "^1.9.10",
     "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "eslint": "^8.0.0",
+    "ts-jest": "^29.4.1",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.4",
     "typescript": "^5.0.0"

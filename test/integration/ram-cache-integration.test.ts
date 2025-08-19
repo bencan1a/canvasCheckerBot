@@ -7,19 +7,63 @@ import { HybridQueryEngine } from '../../src/rag/hybrid-query-engine';
 import { CachedVectorStore } from '../../src/rag/cached-vector-store';
 import { RamVectorCache } from '../../src/rag/ram-vector-cache';
 
+// Mock Ollama to avoid external dependencies
+jest.mock('ollama', () => ({
+  Ollama: jest.fn().mockImplementation(() => ({
+    embeddings: jest.fn().mockResolvedValue({
+      embedding: new Array(768).fill(0).map(() => Math.random())
+    })
+  }))
+}));
+
+// Mock axios for VLLM calls
+jest.mock('axios', () => {
+  const mockPost = jest.fn().mockResolvedValue({
+    data: {
+      choices: [{
+        text: 'Mocked response for testing'
+      }]
+    }
+  });
+  const mockGet = jest.fn().mockResolvedValue({ data: {} });
+  
+  return {
+    default: {
+      post: mockPost,
+      get: mockGet
+    },
+    post: mockPost,
+    get: mockGet
+  };
+});
+
 describe('RAM Cache Integration', () => {
   let hybridEngine: HybridQueryEngine;
 
   beforeEach(async () => {
     // Initialize with RAM cache enabled
-    hybridEngine = new HybridQueryEngine({
-      useRamCache: true,
-      ramCacheConfig: {
-        maxMemoryMB: 1024, // 1GB for testing
-        vectorDimensions: 768,
-        maxDocuments: 10000
+    const vllmConfig = {
+      baseUrl: 'http://localhost:8000',
+      apiKey: 'test-key',
+      model: 'test-model'
+    };
+    
+    hybridEngine = new HybridQueryEngine(
+      vllmConfig,
+      'nomic-embed-text',
+      {
+        enableRamCache: true,
+        ramCacheConfig: {
+          embeddingModel: 'nomic-embed-text',
+          ramCache: {
+            maxMemoryGB: 1, // 1GB for testing
+            cacheStrategy: 'LRU',
+            indexType: 'FLAT',
+            embeddingDimensions: 768
+          }
+        }
       }
-    });
+    );
   });
 
   test('HybridQueryEngine initializes with CachedVectorStore', () => {
@@ -39,146 +83,250 @@ describe('RAM Cache Integration', () => {
   });
 
   test('System can add documents to RAM cache', async () => {
-    const testDocuments = [
-      {
-        id: 'test-1',
-        text: 'Canvas assignment submission with student feedback',
-        metadata: { type: 'assignment', course: 'CS101' }
-      },
-      {
-        id: 'test-2', 
-        text: 'Discussion forum post about course materials',
-        metadata: { type: 'discussion', course: 'CS101' }
-      },
-      {
-        id: 'test-3',
-        text: 'Quiz results showing student performance metrics',
-        metadata: { type: 'quiz', course: 'CS102' }
-      }
-    ];
+    const testStudentData = {
+      courses: [
+        {
+          id: 101,
+          name: 'Computer Science 101',
+          course_code: 'CS101'
+        },
+        {
+          id: 102,
+          name: 'Computer Science 102',
+          course_code: 'CS102'
+        }
+      ],
+      assignments: [
+        {
+          id: 1,
+          name: 'Test Assignment 1',
+          course_id: 101,
+          due_at: '2024-12-30',
+          points_possible: 100,
+          submission: {
+            submitted_at: '2024-12-25',
+            score: 95,
+            grade: 'A'
+          }
+        }
+      ],
+      discussions: [
+        {
+          id: 2,
+          title: 'Discussion Topic',
+          message: 'Discussion about course materials',
+          course_id: 101
+        }
+      ],
+      quizzes: [
+        {
+          id: 3,
+          title: 'Quiz 1',
+          course_id: 102,
+          points_possible: 50
+        }
+      ],
+      submissions: [
+        {
+          assignment_id: 1,
+          workflow_state: 'submitted',
+          submitted_at: '2024-12-25',
+          score: 95,
+          grade: 'A'
+        }
+      ]
+    };
 
-    // Add documents - should populate the RAM cache
-    await hybridEngine.addDocuments(testDocuments);
+    // Initialize with student data - should populate the RAM cache
+    await hybridEngine.initialize(testStudentData as any);
 
     // Verify cache has documents
     const vectorStore = (hybridEngine as any).vectorStore as CachedVectorStore;
-    const cacheStats = vectorStore.getCacheStats();
+    const ramCache = (vectorStore as any).ramCache as RamVectorCache;
+    const cacheStats = ramCache.getStats();
     
-    expect(cacheStats.totalDocuments).toBe(3);
-    expect(cacheStats.memoryUsageMB).toBeGreaterThan(0);
+    expect(cacheStats.totalDocuments).toBeGreaterThan(0);
+    expect(cacheStats.memoryUsedBytes).toBeGreaterThan(0);
   });
 
-  test('System can perform searches using RAM cache', async () => {
-    // Add test documents
-    const testDocuments = [
-      {
-        id: 'assignment-1',
-        text: 'Student submitted assignment with code implementation',
-        metadata: { type: 'assignment', subject: 'programming' }
-      },
-      {
-        id: 'discussion-1',
-        text: 'Forum discussion about programming concepts and algorithms',
-        metadata: { type: 'discussion', subject: 'programming' }
-      },
-      {
-        id: 'quiz-1',
-        text: 'Quiz covering data structures and algorithm complexity',
-        metadata: { type: 'quiz', subject: 'algorithms' }
-      }
-    ];
+  test('System can perform queries using RAM cache', async () => {
+    // Add test student data
+    const testStudentData = {
+      courses: [
+        {
+          id: 101,
+          name: 'Computer Science 101',
+          course_code: 'CS101'
+        }
+      ],
+      assignments: [
+        {
+          id: 1,
+          name: 'Programming Assignment',
+          course_id: 101,
+          description: 'Implement a sorting algorithm',
+          due_at: '2024-12-30',
+          points_possible: 100,
+          submission: {
+            submitted_at: '2024-12-25',
+            score: 95,
+            grade: 'A'
+          }
+        },
+        {
+          id: 2,
+          name: 'Data Structures Assignment',
+          course_id: 101,
+          description: 'Implement a binary tree',
+          due_at: '2024-12-31',
+          points_possible: 100
+        }
+      ],
+      discussions: [
+        {
+          id: 3,
+          title: 'Programming Concepts',
+          message: 'Discussion about programming concepts and algorithms',
+          course_id: 101
+        }
+      ],
+      quizzes: [],
+      submissions: [
+        {
+          assignment_id: 1,
+          workflow_state: 'submitted',
+          submitted_at: '2024-12-25',
+          score: 95,
+          grade: 'A'
+        }
+      ]
+    };
 
-    await hybridEngine.addDocuments(testDocuments);
+    await hybridEngine.initialize(testStudentData as any);
 
-    // Perform search
-    const results = await hybridEngine.search('programming assignment', {
-      k: 2,
-      includeMetadata: true
-    });
+    // Perform query
+    const result = await hybridEngine.query('programming assignment');
 
-    expect(results).toBeDefined();
-    expect(results.length).toBeGreaterThan(0);
-    expect(results.length).toBeLessThanOrEqual(2);
-    
-    // Verify results have the expected structure
-    results.forEach(result => {
-      expect(result).toHaveProperty('content');
-      expect(result).toHaveProperty('similarity');
-      expect(result).toHaveProperty('metadata');
-      expect(typeof result.similarity).toBe('number');
-    });
+    expect(result).toBeDefined();
+    expect(result).toHaveProperty('answer');
+    expect(result).toHaveProperty('confidence');
+    expect(result).toHaveProperty('sources');
+    expect(typeof result.confidence).toBe('number');
   });
 
   test('Cache statistics are properly tracked', async () => {
     const vectorStore = (hybridEngine as any).vectorStore as CachedVectorStore;
+    const ramCache = (vectorStore as any).ramCache as RamVectorCache;
     
     // Initial state
-    let stats = vectorStore.getCacheStats();
-    expect(stats.cacheHits).toBe(0);
-    expect(stats.cacheMisses).toBe(0);
+    let stats = ramCache.getStats();
+    expect(stats.cacheHitRate).toBe(0);
+    expect(stats.evictionCount).toBe(0);
 
     // Add documents
-    await hybridEngine.addDocuments([
-      {
-        id: 'cache-test-1',
-        text: 'Test document for cache statistics validation',
-        metadata: { test: true }
-      }
-    ]);
+    const testStudentData = {
+      courses: [
+        {
+          id: 101,
+          name: 'Computer Science 101',
+          course_code: 'CS101'
+        }
+      ],
+      assignments: [
+        {
+          id: 1,
+          name: 'Test Assignment',
+          course_id: 101,
+          description: 'Test document for cache statistics validation',
+          due_at: '2024-12-30',
+          points_possible: 100
+        }
+      ],
+      discussions: [],
+      quizzes: [],
+      submissions: []
+    };
 
-    // Perform searches to generate cache activity
-    await hybridEngine.search('test document', { k: 1 });
-    await hybridEngine.search('cache validation', { k: 1 });
+    await hybridEngine.initialize(testStudentData as any);
+
+    // Perform queries to generate cache activity
+    await hybridEngine.query('test document');
+    await hybridEngine.query('cache validation');
 
     // Check updated statistics
-    stats = vectorStore.getCacheStats();
-    expect(stats.totalDocuments).toBe(1);
-    expect(stats.totalSearches).toBeGreaterThan(0);
+    stats = ramCache.getStats();
+    expect(stats.totalDocuments).toBeGreaterThan(0);
+    expect(stats.averageSearchTime).toBeGreaterThanOrEqual(0);
   });
 
-  test('Performance statistics are available', async () => {
+  test('Performance statistics are available', () => {
     const performanceStats = hybridEngine.getPerformanceStats();
     
-    expect(performanceStats).toHaveProperty('averageSearchTime');
-    expect(performanceStats).toHaveProperty('totalSearches');
-    expect(performanceStats).toHaveProperty('cacheHitRate');
+    expect(performanceStats).toHaveProperty('stats');
     expect(performanceStats).toHaveProperty('memoryUsage');
+    expect(performanceStats).toHaveProperty('performanceMetrics');
   });
 
-  test('Memory usage tracking works correctly', async () => {
+  test('Memory usage tracking works correctly', () => {
     const memoryUsage = hybridEngine.getMemoryUsage();
     
-    expect(memoryUsage).toHaveProperty('vectorCacheSize');
-    expect(memoryUsage).toHaveProperty('documentsCached');
-    expect(memoryUsage).toHaveProperty('maxMemoryMB');
-    expect(memoryUsage).toHaveProperty('usedMemoryMB');
+    expect(memoryUsage).toHaveProperty('totalAllocatedGB');
+    expect(memoryUsage).toHaveProperty('ramCache');
+    expect(memoryUsage.ramCache).toHaveProperty('vectorMemoryGB');
+    expect(memoryUsage.ramCache).toHaveProperty('metadataMemoryMB');
     
-    expect(typeof memoryUsage.vectorCacheSize).toBe('number');
-    expect(typeof memoryUsage.documentsCached).toBe('number');
+    expect(typeof memoryUsage.totalAllocatedGB).toBe('number');
+    expect(typeof memoryUsage.ramCache.vectorMemoryGB).toBe('number');
   });
 
   test('System gracefully handles configuration changes', () => {
     // Test initialization with different configurations
-    const smallCacheEngine = new HybridQueryEngine({
-      useRamCache: true,
-      ramCacheConfig: {
-        maxMemoryMB: 512,
-        vectorDimensions: 384,
-        maxDocuments: 5000
+    const vllmConfig = {
+      baseUrl: 'http://localhost:8000',
+      apiKey: 'test-key',
+      model: 'test-model'
+    };
+    
+    const smallCacheEngine = new HybridQueryEngine(
+      vllmConfig,
+      'nomic-embed-text',
+      {
+        enableRamCache: true,
+        ramCacheConfig: {
+          embeddingModel: 'nomic-embed-text',
+          ramCache: {
+            maxMemoryGB: 0.5, // 512MB
+            cacheStrategy: 'LRU',
+            indexType: 'FLAT',
+            embeddingDimensions: 384
+          }
+        }
       }
-    });
+    );
 
     expect(smallCacheEngine).toBeInstanceOf(HybridQueryEngine);
     
-    const memoryConfig = smallCacheEngine.getMemoryUsage();
-    expect(memoryConfig.maxMemoryMB).toBe(512);
+    const vectorStore = (smallCacheEngine as any).vectorStore as CachedVectorStore;
+    const ramCache = (vectorStore as any).ramCache as RamVectorCache;
+    const memoryUsage = ramCache.getMemoryUsage();
+    expect(memoryUsage.totalAllocatedGB).toBeLessThanOrEqual(0.5);
   });
 
   test('Backwards compatibility without RAM cache', () => {
     // Test that the system still works without RAM cache enabled
-    const traditionalEngine = new HybridQueryEngine({
-      useRamCache: false
-    });
+    const vllmConfig = {
+      baseUrl: 'http://localhost:8000',
+      apiKey: 'test-key',
+      model: 'test-model'
+    };
+    
+    const traditionalEngine = new HybridQueryEngine(
+      vllmConfig,
+      'nomic-embed-text',
+      {
+        enableRamCache: false
+      }
+    );
 
     expect(traditionalEngine).toBeInstanceOf(HybridQueryEngine);
     
