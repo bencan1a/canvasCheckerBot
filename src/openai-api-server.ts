@@ -105,12 +105,12 @@ export class CanvasRAGAPIServer {
           object: 'list',
           data: [
             {
-              id: 'canvas-rag-assistant',
+              id: 'canvasbot',
               object: 'model',
               created: Math.floor(Date.now() / 1000),
               owned_by: 'canvas-checker-bot',
               permission: [],
-              root: 'canvas-rag-assistant',
+              root: 'canvasbot',
               parent: null
             }
           ]
@@ -187,7 +187,7 @@ export class CanvasRAGAPIServer {
                 id: responseId,
                 object: 'chat.completion.chunk',
                 created,
-                model: request.model || 'canvas-rag-assistant',
+                model: request.model || 'canvasbot',
                 choices: [{
                   index: 0,
                   delta: {
@@ -203,7 +203,7 @@ export class CanvasRAGAPIServer {
                 id: responseId,
                 object: 'chat.completion.chunk',
                 created,
-                model: request.model || 'canvas-rag-assistant',
+                model: request.model || 'canvasbot',
                 choices: [{
                   index: 0,
                   delta: {},
@@ -223,7 +223,7 @@ export class CanvasRAGAPIServer {
             id: responseId,
             object: 'chat.completion',
             created,
-            model: request.model || 'canvas-rag-assistant',
+            model: request.model || 'canvasbot',
             choices: [{
               index: 0,
               message: {
@@ -337,7 +337,7 @@ export class CanvasRAGAPIServer {
         },
         usage: {
           integration: 'Use with any OpenAI-compatible chat interface',
-          model_name: 'canvas-rag-assistant',
+          model_name: 'canvasbot',
           base_url: `http://localhost:${process.env.PORT || 3001}`
         }
       });

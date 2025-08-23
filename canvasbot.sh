@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # CanvasBot - Canvas LMS AI Assistant
-# One-command startup for the complete Canvas AI system
+# Simplified launcher for the 4-service CanvasBot system
 
 set -e
 
@@ -39,21 +39,84 @@ check_service() {
     return 1
 }
 
-# Function to pull Ollama models
-setup_ollama_models() {
-    echo -e "${BLUE}Setting up Ollama models...${NC}"
+# Function to check if a container exists
+container_exists() {
+    local container_name="$1"
+    docker ps -a --format "table {{.Names}}" | grep -q "^${container_name}$"
+}
+
+# Function to start or create a container
+start_or_create_container() {
+    local service_name="$1"
+    local container_name="canvasbot-${service_name}"
     
-    # Check if models exist
-    LLM_MODEL=${LLM_MODEL:-llama3}
-    EMBEDDING_MODEL=${EMBEDDING_MODEL:-nomic-embed-text}
+    if container_exists "$container_name"; then
+        echo -e "${BLUE}🔄 Starting existing $service_name container...${NC}"
+        docker start "$container_name" > /dev/null 2>&1
+        return $?
+    else
+        echo -e "${BLUE}🆕 Creating new $service_name container...${NC}"
+        docker-compose up -d "$service_name" > /dev/null 2>&1
+        return $?
+    fi
+}
+
+# Function to start core services intelligently
+start_core_services() {
+    local services=("vllm" "ollama" "canvasbot" "open-webui")
+    local all_success=true
     
-    echo "Pulling LLM model: $LLM_MODEL"
-    ollama pull "$LLM_MODEL" || echo -e "${YELLOW}⚠️ Failed to pull $LLM_MODEL${NC}"
+    echo -e "${BLUE}🐳 Starting CanvasBot services intelligently...${NC}"
     
-    echo "Pulling embedding model: $EMBEDDING_MODEL"
-    ollama pull "$EMBEDDING_MODEL" || echo -e "${YELLOW}⚠️ Failed to pull $EMBEDDING_MODEL${NC}"
+    for service in "${services[@]}"; do
+        if ! start_or_create_container "$service"; then
+            echo -e "${RED}❌ Failed to start $service${NC}"
+            all_success=false
+        fi
+    done
     
-    echo -e "${GREEN}✅ Ollama models setup complete${NC}"
+    if [ "$all_success" = true ]; then
+        echo -e "${GREEN}✅ All services started successfully${NC}"
+        return 0
+    else
+        echo -e "${YELLOW}⚠️ Some services may have failed to start${NC}"
+        return 1
+    fi
+}
+
+# Function to show help
+show_help() {
+    echo "CanvasBot Launcher - Simplified"
+    echo "==============================="
+    echo ""
+    echo "Usage: $0 [COMMAND]"
+    echo ""
+    echo "COMMANDS:"
+    echo "  up      - Start all CanvasBot services (default)"
+    echo "  down    - Stop all CanvasBot services"
+    echo "  restart - Restart all services"
+    echo "  logs    - Show service logs"
+    echo "  status  - Show container status"
+    echo "  help    - Show this help message"
+    echo ""
+    echo "Examples:"
+    echo "  $0           # Start all services"
+    echo "  $0 up        # Start all services"
+    echo "  $0 down      # Stop all services"
+    echo "  $0 restart   # Restart all services"
+    echo "  $0 logs      # Show logs"
+    echo "  $0 status    # Check status"
+    echo ""
+    echo "Services (all start automatically):"
+    echo "  - CanvasBot API (port 3001)"
+    echo "  - vLLM (port 8000)"
+    echo "  - Ollama (port 11435)"
+    echo "  - Open WebUI (port 8081)"
+    echo ""
+    echo "Management:"
+    echo "  Start: docker-compose up -d"
+    echo "  Stop:  docker-compose down"
+    exit 0
 }
 
 # Check if .env file exists
@@ -65,6 +128,7 @@ if [ ! -f ".env" ]; then
 fi
 
 # Load environment variables
+# shellcheck disable=SC1091
 source .env
 
 # Check required environment variables
@@ -81,458 +145,85 @@ echo "  LLM Model: ${LLM_MODEL:-llama3}"
 echo "  Embedding Model: ${EMBEDDING_MODEL:-nomic-embed-text}"
 echo ""
 
-# Determine startup mode and interface
-STARTUP_MODE=${1:-docker}
-INTERFACE=${2:-none}
+# Get command
+COMMAND=${1:-up}
 
-# Function to install Oobabooga
-install_oobabooga() {
-    local install_dir="${OOBABOOGA_DIR:-$HOME/text-generation-webui}"
-    
-    echo -e "${BLUE}Installing Oobabooga Text Generation WebUI...${NC}"
-    echo "Installation directory: $install_dir"
-    
-    # Clone repository
-    if [ ! -d "$install_dir" ]; then
-        echo "Cloning Oobabooga repository..."
-        git clone https://github.com/oobabooga/text-generation-webui.git "$install_dir"
-        if [ $? -ne 0 ]; then
-            echo -e "${RED}❌ Failed to clone Oobabooga repository${NC}"
-            return 1
-        fi
-    fi
-    
-    cd "$install_dir"
-    
-    # Check if conda/mamba is available
-    if command -v conda >/dev/null 2>&1; then
-        echo "Using conda for installation..."
-        # Create conda environment
-        conda env create -f environment.yml 2>/dev/null || conda env update -f environment.yml
-        echo "Activating conda environment..."
-        eval "$(conda shell.bash hook)"
-        conda activate textgen
-    elif command -v python3 >/dev/null 2>&1; then
-        echo "Using pip for installation..."
-        # Create virtual environment
-        python3 -m venv venv
-        source venv/bin/activate
-        
-        # Install requirements
-        pip install -r requirements.txt
-    else
-        echo -e "${RED}❌ Python 3 not found. Please install Python 3.8+ first.${NC}"
-        return 1
-    fi
-    
-    echo -e "${GREEN}✅ Oobabooga installation complete${NC}"
-    return 0
-}
-
-# Function to setup Oobabooga
-setup_oobabooga() {
-    echo -e "${BLUE}Setting up Oobabooga integration...${NC}"
-    
-    OOBABOOGA_DIR="${OOBABOOGA_DIR:-$HOME/text-generation-webui}"
-    
-    # Install if not found
-    if [ ! -d "$OOBABOOGA_DIR" ]; then
-        echo -e "${YELLOW}Oobabooga not found. Installing...${NC}"
-        if ! install_oobabooga; then
-            echo -e "${RED}❌ Failed to install Oobabooga${NC}"
-            echo "You can install manually from: https://github.com/oobabooga/text-generation-webui"
-            return 1
-        fi
-    fi
-    
-    # Create Canvas RAG settings for Oobabooga
-    cat > "$OOBABOOGA_DIR/settings-canvas-rag.yaml" << EOF
-mode: 'api'
-api_mode: 'openai'
-openai_api_base: 'http://localhost:3001/v1'
-openai_api_key: 'canvas-rag'
-model: 'canvas-rag-assistant'
-chat_style: 'assistant'
-preset: 'simple-1'
-max_new_tokens: 2048
-temperature: 0.7
-extensions:
-  - openai
-  - api
-EOF
-    
-    echo -e "${GREEN}✅ Oobabooga configured for Canvas RAG${NC}"
-    
-    # Start Oobabooga
-    cd "$OOBABOOGA_DIR"
-    
-    # Activate the appropriate Python environment
-    if [ -f "venv/bin/activate" ]; then
-        echo "Activating Python virtual environment..."
-        source venv/bin/activate
-    elif command -v conda >/dev/null 2>&1; then
-        echo "Activating conda environment..."
-        eval "$(conda shell.bash hook)"
-        conda activate textgen 2>/dev/null || true
-    fi
-    
-    # Network access is enabled by default, can be disabled with NETWORK_ACCESS=false
-    if [ "$NETWORK_ACCESS" = "false" ]; then
-        echo "Starting Oobabooga (localhost only)..."
-        python server.py \
-            --settings settings-canvas-rag.yaml \
-            --api \
-            --extensions openai \
-            --verbose &
-    else
-        echo -e "${GREEN}🌐 Starting Oobabooga with network access enabled${NC}"
-        python server.py \
-            --settings settings-canvas-rag.yaml \
-            --api \
-            --extensions openai \
-            --listen \
-            --listen-host 0.0.0.0 \
-            --listen-port 7860 \
-            --verbose &
-    fi
-    
-    OOBABOOGA_PID=$!
-    export OOBABOOGA_PID
-    
-    check_service "Oobabooga WebUI" "http://localhost:7860"
-    
-    echo -e "${GREEN}✅ Oobabooga is ready at http://localhost:7860${NC}"
-    echo "Configure in Oobabooga:"
-    echo "  API: OpenAI"
-    echo "  URL: http://localhost:3001/v1"
-    echo "  Model: canvas-rag-assistant"
-}
-
-case $STARTUP_MODE in
-    "docker")
-        echo -e "${BLUE}🐳 Starting with Docker Compose...${NC}"
-        
-        # Build if needed
+case $COMMAND in
+    "up")
+        # Check if Dockerfile exists
         if [ ! -f "Dockerfile" ]; then
             echo -e "${RED}❌ Dockerfile not found!${NC}"
             exit 1
         fi
         
-        # Start core services
-        echo "Starting Ollama and Canvas RAG API..."
-        docker-compose up -d ollama canvas-rag-api
+        # Start all services intelligently
+        start_core_services
         
-        # Wait for services
-        check_service "Ollama" "http://localhost:11434/api/tags"
-        
-        # Setup models in Docker
-        echo -e "${BLUE}Setting up Ollama models in Docker...${NC}"
-        docker-compose exec ollama ollama pull ${LLM_MODEL:-llama3}
-        docker-compose exec ollama ollama pull ${EMBEDDING_MODEL:-nomic-embed-text}
-        
-        check_service "Canvas RAG API" "http://localhost:3001/health"
-        
-        echo -e "${GREEN}✅ Core system is ready!${NC}"
-        
-        # Start interface if requested
-        case $INTERFACE in
-            "webui")
-                echo -e "${BLUE}Starting Open WebUI...${NC}"
-                docker-compose --profile webui up -d
-                check_service "Open WebUI" "http://localhost:8080"
-                echo -e "${GREEN}✅ Open WebUI ready at http://localhost:8080${NC}"
-                ;;
-            "oobabooga")
-                echo -e "${BLUE}Starting Oobabooga...${NC}"
-                docker-compose --profile oobabooga up -d
-                check_service "Oobabooga" "http://localhost:7860"
-                echo -e "${GREEN}✅ Oobabooga ready at http://localhost:7860${NC}"
-                ;;
-            "none")
-                echo ""
-                echo "To start a chat interface:"
-                echo "  Open WebUI: $0 docker webui"
-                echo "  Oobabooga: $0 docker oobabooga"
-                ;;
-        esac
-        ;;
-        
-    "local")
-        echo -e "${BLUE}💻 Starting locally...${NC}"
-        
-        # Check if Node.js dependencies are installed
-        if [ ! -d "node_modules" ]; then
-            echo "Installing Node.js dependencies..."
-            npm install
-        fi
-        
-        # Build TypeScript
-        echo "Building TypeScript..."
-        npm run build
-        
-        # Check if Ollama is running
-        if ! curl -s http://localhost:11434/api/tags > /dev/null 2>&1; then
-            echo -e "${YELLOW}⚠️ Ollama is not running. Please start it first:${NC}"
-            echo "  ollama serve"
-            exit 1
-        fi
-        
-        # Setup Ollama models
-        setup_ollama_models
-        
-        # Check if vLLM should be started
-        if [ "$START_VLLM" = "true" ]; then
-            echo -e "${BLUE}Starting vLLM server...${NC}"
-            ./start-vllm.sh &
-            VLLM_PID=$!
-            check_service "vLLM" "http://localhost:8000/v1/models"
-        fi
-        
-        # Start Canvas RAG API
-        echo -e "${BLUE}Starting Canvas RAG API server...${NC}"
-        npm run api-server &
-        API_PID=$!
-        
-        check_service "Canvas RAG API" "http://localhost:3001/health"
-        
-        echo -e "${GREEN}✅ Local system is ready!${NC}"
-        
-        # Start interface if requested
-        case $INTERFACE in
-            "oobabooga")
-                setup_oobabooga
-                ;;
-            "none")
-                echo ""
-                echo "To start Oobabooga interface:"
-                echo "  $0 local oobabooga"
-                ;;
-        esac
-        
-        # Initial data sync
-        echo -e "${BLUE}Syncing Canvas data...${NC}"
-        curl -X POST http://localhost:3001/canvas/sync
-        echo -e "${GREEN}✅ Canvas data synced${NC}"
-        
-        # Cleanup function
-        cleanup() {
-            echo -e "${YELLOW}🛑 Shutting down services...${NC}"
-            [ ! -z "$API_PID" ] && kill $API_PID 2>/dev/null || true
-            [ ! -z "$VLLM_PID" ] && kill $VLLM_PID 2>/dev/null || true
-            [ ! -z "$OOBABOOGA_PID" ] && kill $OOBABOOGA_PID 2>/dev/null || true
-            echo -e "${GREEN}✅ Cleanup complete${NC}"
-        }
-        
-        trap cleanup EXIT
-        
-        echo "Press Ctrl+C to stop all services"
-        wait
-        ;;
-        
-    "test")
-        echo -e "${BLUE}🧪 Running system tests...${NC}"
-        
-        # Test Canvas connection
-        echo "Testing Canvas API connection..."
-        npm run dev test
-        
-        # Test data sync
-        echo "Testing Canvas data sync..."
-        npm run dev sync
-        
-        # Start API server briefly for testing
-        npm run api-server &
-        API_PID=$!
-        
+        echo -e "${BLUE}⏳ Waiting for services to be ready...${NC}"
         sleep 5
         
-        # Test API endpoints
-        echo "Testing API endpoints..."
-        curl -f http://localhost:3001/health || echo -e "${RED}❌ Health check failed${NC}"
-        curl -f http://localhost:3001/canvas/status || echo -e "${RED}❌ Status check failed${NC}"
-        
-        # Cleanup
-        kill $API_PID 2>/dev/null || true
-        
-        echo -e "${GREEN}✅ Tests complete${NC}"
-        ;;
-
-    "full")
-        echo -e "${BLUE}🚀 Starting FULL Canvas RAG System...${NC}"
-        echo "This will start: vLLM + Canvas RAG API + Oobabooga + Network Access"
-        echo ""
-        
-        # Enable vLLM (network access is default)
-        export START_VLLM=true
-        
-        # Check if Node.js dependencies are installed
-        if [ ! -d "node_modules" ]; then
-            echo "Installing Node.js dependencies..."
-            npm install
-        fi
-        
-        # Build TypeScript
-        echo "Building TypeScript..."
-        npm run build
-        
-        # Check if Ollama is running
-        if ! curl -s http://localhost:11434/api/tags > /dev/null 2>&1; then
-            echo -e "${YELLOW}⚠️ Ollama is not running. Starting Ollama...${NC}"
-            if command -v ollama >/dev/null 2>&1; then
-                ollama serve &
-                OLLAMA_PID=$!
-                export OLLAMA_PID
-                sleep 5
-            else
-                echo -e "${RED}❌ Ollama not found. Please install from: https://ollama.ai${NC}"
-                exit 1
-            fi
-        fi
+        # Check service health
+        echo -e "${BLUE}🔍 Checking service health...${NC}"
+        check_service "Ollama" "http://localhost:11435/api/tags" || echo -e "${YELLOW}⚠️ Ollama check failed${NC}"
+        check_service "vLLM" "http://localhost:8000/v1/models" || echo -e "${YELLOW}⚠️ vLLM check failed${NC}"
+        check_service "CanvasBot API" "http://localhost:3001/health" || echo -e "${YELLOW}⚠️ CanvasBot API check failed${NC}"
+        check_service "Open WebUI" "http://localhost:8081" || echo -e "${YELLOW}⚠️ Open WebUI check failed${NC}"
         
         # Setup Ollama models
-        setup_ollama_models
-        
-        # Start vLLM server
-        echo -e "${BLUE}Starting vLLM server...${NC}"
-        if [ -f "./start-vllm.sh" ]; then
-            ./start-vllm.sh &
-            VLLM_PID=$!
-            export VLLM_PID
-            check_service "vLLM" "http://localhost:8000/v1/models"
-        else
-            echo -e "${YELLOW}⚠️ start-vllm.sh not found, skipping vLLM startup${NC}"
-        fi
-        
-        # Start Canvas RAG API
-        echo -e "${BLUE}Starting Canvas RAG API server...${NC}"
-        npm run api-server &
-        API_PID=$!
-        export API_PID
-        
-        check_service "Canvas RAG API" "http://localhost:3001/health"
-        
-        # Setup and start Oobabooga
-        setup_oobabooga
-        
-        # Initial data sync
-        echo -e "${BLUE}Syncing Canvas data...${NC}"
-        curl -X POST http://localhost:3001/canvas/sync || echo -e "${YELLOW}⚠️ Initial sync failed, will retry later${NC}"
-        
-        echo -e "${GREEN}✅ FULL Canvas RAG System is ready!${NC}"
-        
-        # Enhanced cleanup function for full mode
-        cleanup_full() {
-            echo -e "${YELLOW}🛑 Shutting down all services...${NC}"
-            [ ! -z "$API_PID" ] && kill $API_PID 2>/dev/null || true
-            [ ! -z "$VLLM_PID" ] && kill $VLLM_PID 2>/dev/null || true
-            [ ! -z "$OOBABOOGA_PID" ] && kill $OOBABOOGA_PID 2>/dev/null || true
-            [ ! -z "$OLLAMA_PID" ] && kill $OLLAMA_PID 2>/dev/null || true
-            echo -e "${GREEN}✅ All services stopped${NC}"
-        }
-        
-        trap cleanup_full EXIT
+        echo -e "${BLUE}🔧 Setting up Ollama models...${NC}"
+        docker-compose exec ollama ollama pull "${LLM_MODEL:-llama3}" 2>/dev/null || echo -e "${YELLOW}⚠️ Failed to pull LLM model${NC}"
+        docker-compose exec ollama ollama pull "${EMBEDDING_MODEL:-nomic-embed-text}" 2>/dev/null || echo -e "${YELLOW}⚠️ Failed to pull embedding model${NC}"
         
         echo ""
-        echo "🎉 FULL SETUP COMPLETE!"
-        echo "Press Ctrl+C to stop all services"
+        echo -e "${GREEN}🎉 CanvasBot system is ready!${NC}"
         echo ""
-        wait
+        echo "Service URLs:"
+        echo -e "${GREEN}  • CanvasBot API: http://localhost:3001${NC}"
+        echo -e "${GREEN}  • Open WebUI: http://localhost:8081${NC}"
+        echo -e "${GREEN}  • vLLM API: http://localhost:8000${NC}"
+        echo -e "${GREEN}  • Ollama API: http://localhost:11435${NC}"
+        echo ""
+        echo "Quick Start:"
+        echo "1. Open http://localhost:8081 in your browser"
+        echo "2. The CanvasBot model is pre-configured"
+        echo "3. Start chatting about your Canvas data!"
+        echo ""
+        echo "Example Questions:"
+        echo "  • What assignments are due this week?"
+        echo "  • Show me my current grades"
+        echo "  • Which assignments am I missing?"
+        echo "  • When is my next quiz?"
+        ;;
+        
+    "down")
+        echo -e "${BLUE}🛑 Stopping all CanvasBot services...${NC}"
+        docker-compose down
+        echo -e "${GREEN}✅ All services stopped${NC}"
+        ;;
+        
+    "restart")
+        echo -e "${BLUE}🔄 Restarting all CanvasBot services...${NC}"
+        docker-compose restart
+        echo -e "${GREEN}✅ All services restarted${NC}"
+        ;;
+        
+    "logs")
+        echo -e "${BLUE}📋 Showing service logs...${NC}"
+        docker-compose logs -f
+        ;;
+        
+    "status")
+        echo -e "${BLUE}📊 Service status:${NC}"
+        docker-compose ps
+        ;;
+        
+    "help"|"-h"|"--help")
+        show_help
         ;;
         
     *)
-        echo "Usage: $0 [mode] [interface]"
+        echo -e "${RED}❌ Unknown command: $COMMAND${NC}"
         echo ""
-        echo "Modes:"
-        echo "  docker    - Start with Docker Compose (recommended)"
-        echo "  local     - Start locally with Node.js"
-        echo "  full      - Complete setup: vLLM + Canvas RAG + Oobabooga + Network Access"
-        echo "  test      - Run system tests"
-        echo ""
-        echo "Interfaces (optional, not needed for 'full' mode):"
-        echo "  oobabooga - Text Generation WebUI (works with local and docker)"
-        echo "  webui     - Open WebUI (docker only)"
-        echo "  none      - API only, no chat interface (default)"
-        echo ""
-        echo "Examples:"
-        echo "  $0 full              # Complete setup with everything (RECOMMENDED)"
-        echo "  $0 docker oobabooga # Start with Docker + Oobabooga"
-        echo "  $0 local oobabooga  # Start locally + Oobabooga"
-        echo ""
-        echo "Environment Variables:"
-        echo "  OOBABOOGA_DIR  - Path to Oobabooga installation (default: ~/text-generation-webui)"
-        echo "  START_VLLM     - Set to 'true' to start vLLM server (local mode)"
-        echo "  NETWORK_ACCESS - Set to 'false' to disable network access (default: enabled)"
-        echo ""
-        echo "Network Access:"
-        echo "  Network access is ENABLED by default for easy device access"
-        echo "  To disable: NETWORK_ACCESS=false $0 local oobabooga"
-        exit 1
+        show_help
         ;;
 esac
-
-# Final status and instructions
-echo ""
-echo "🎉 Canvas RAG System Status:"
-echo "================================="
-echo -e "${GREEN}✅ Canvas RAG API: http://localhost:3001${NC}"
-echo -e "${GREEN}✅ API Documentation: http://localhost:3001/${NC}"
-echo -e "${GREEN}✅ OpenAI Endpoint: http://localhost:3001/v1${NC}"
-
-# Show interface-specific URLs
-if [ "$INTERFACE" = "oobabooga" ]; then
-    echo -e "${GREEN}✅ CanvasBot WebUI: http://localhost:7860${NC}"
-    if [ "$NETWORK_ACCESS" != "false" ]; then
-        # Get local IP address
-        LOCAL_IP=$(hostname -I | awk '{print $1}' 2>/dev/null || ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | head -n1)
-        if [ ! -z "$LOCAL_IP" ]; then
-            echo -e "${GREEN}✅ Network Access: http://${LOCAL_IP}:7860${NC}"
-            echo -e "${GREEN}✅ CanvasBot API: http://${LOCAL_IP}:3001${NC}"
-        fi
-    fi
-elif [ "$INTERFACE" = "webui" ]; then
-    echo -e "${GREEN}✅ Open WebUI: http://localhost:8080${NC}"
-fi
-
-echo ""
-echo "Quick Start:"
-echo "============"
-
-if [ "$INTERFACE" = "oobabooga" ]; then
-    echo "1. Open http://localhost:7860 in your browser"
-    echo "2. Go to Parameters → Model → API"
-    echo "3. Select 'OpenAI' and configure:"
-    echo "   - API URL: http://localhost:3001/v1"
-    echo "   - Model: canvas-rag-assistant"
-    echo "   - API Key: canvas-rag (any value works)"
-    echo "4. Start chatting about your Canvas data!"
-elif [ "$INTERFACE" = "webui" ]; then
-    echo "1. Open http://localhost:8080 in your browser"
-    echo "2. The Canvas RAG model is pre-configured"
-    echo "3. Start chatting about your Canvas data!"
-else
-    echo "API Endpoints:"
-    echo "  - Sync data: curl -X POST http://localhost:3001/canvas/sync"
-    echo "  - Check status: curl http://localhost:3001/canvas/status"
-    echo "  - Query data:"
-    echo '    curl -X POST http://localhost:3001/v1/chat/completions \'
-    echo '      -H "Content-Type: application/json" \'
-    echo '      -d '"'"'{"model": "canvas-rag-assistant", "messages": [{"role": "user", "content": "What assignments are due?"}]}'"'"
-fi
-
-echo ""
-echo "Example Questions:"
-echo "  • What assignments are due this week?"
-echo "  • Show me my current grades"
-echo "  • Which assignments am I missing?"
-echo "  • When is my next quiz?"
-echo "  • What discussions need my participation?"
-echo ""
-
-if [ "$STARTUP_MODE" = "docker" ]; then
-    echo "Management Commands:"
-    echo "  Stop all: docker-compose down"
-    echo "  View logs: docker-compose logs -f canvas-rag-api"
-    echo "  Restart: docker-compose restart canvas-rag-api"
-elif [ "$STARTUP_MODE" = "local" ]; then
-    echo "Press Ctrl+C to stop all services"
-fi

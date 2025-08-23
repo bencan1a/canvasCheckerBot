@@ -1,7 +1,7 @@
 {
   "name": "canvasbot",
   "version": "1.0.0",
-  "description": "CanvasBot - AI assistant for Canvas LMS with RAG and chat interface",
+  "description": "CanvasBot - AI assistant that helps students with Canvas LMS assignments, grades, submissions, and course management through natural language queries",
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
@@ -12,7 +12,7 @@
     "query-cli": "tsx src/query-cli.ts",
     "api-server": "tsx src/openai-api-server.ts",
     "api-server:prod": "node dist/openai-api-server.js",
-    "canvasbot": "docker-compose up canvasbot vllm ollama",
+    "canvasbot": "bash ./canvasbot.sh",
     "canvasbot:chat": "docker-compose --profile chat up",
     "canvasbot:webui": "docker-compose --profile webui up",
     "canvasbot:full": "docker-compose --profile chat up",

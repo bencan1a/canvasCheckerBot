@@ -42,9 +42,19 @@ services:
       - TENSOR_PARALLEL_SIZE=${VLLM_GPU_COUNT:-1}
       - MAX_MODEL_LEN=${VLLM_MAX_LENGTH:-10176}
       - TRUST_REMOTE_CODE=true
+      # NCCL debugging and optimization for multi-GPU tensor parallelism
+      - NCCL_DEBUG=INFO
+      - NCCL_DEBUG_SUBSYS=ALL
+      - NCCL_SOCKET_IFNAME=^docker0,lo
+      - NCCL_IB_DISABLE=1
+      - NCCL_P2P_DISABLE=0
+      - NCCL_SHM_DISABLE=0
+      - CUDA_VISIBLE_DEVICES=0,1
     volumes:
       - vllm_cache:/root/.cache
       - ./models:/models
+    # Allocate sufficient shared memory for NCCL inter-GPU communication
+    shm_size: '2g'
     restart: unless-stopped
     networks:
       - canvasbot-network
@@ -53,13 +63,13 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-    # Requires GPU
+    # Requires GPUs 0,1 for tensor parallelism
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
-              device_ids: ['0']
+              device_ids: ['0', '1']
               capabilities: [gpu]
 
   # Ollama for Embeddings Only
@@ -89,38 +99,9 @@ services:
               device_ids: ['2']
               capabilities: [gpu]
 
-  # CanvasBot Chat Interface (Oobabooga)
-  oobabooga:
-    image: atinoda/text-generation-webui:latest
-    container_name: canvasbot-chat
-    ports:
-      - "0.0.0.0:7860:7860"  # Network accessible by default
-    volumes:
-      - ./models:/app/models
-      - ./characters:/app/characters
-      - ./presets:/app/presets
-      - ./oobabooga-config:/app/settings:rw
-    environment:
-      - EXTRA_LAUNCH_ARGS=--api --extensions openai --listen --listen-host 0.0.0.0 --listen-port 7860
-      - OPENAI_API_BASE=http://canvasbot:3001/v1
-      - OPENAI_API_KEY=canvasbot-key
-    restart: unless-stopped
-    depends_on:
-      - canvasbot
-      - vllm
-    networks:
-      - canvasbot-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:7860"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    profiles:
-      - chat
-
-  # Alternative: Open WebUI Interface
+  # Open WebUI Interface
   open-webui:
-    image: ghcr.io/open-webui/open-webui:main
+    image: ghcr.io/open-webui/open-webui:0.6.23
     container_name: canvasbot-webui
     ports:
       - "0.0.0.0:8081:8080"
@@ -148,8 +129,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-    profiles:
-      - webui
 
 volumes:
   ollama_data:
@@ -158,5 +137,4 @@ volumes:
 
 networks:
   canvasbot-network:
-    name: canvasbot
     driver: bridge

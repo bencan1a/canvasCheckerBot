@@ -3,6 +3,7 @@ import { SimpleVectorStore as VectorStore, SearchResult } from './simple-vector-
 import { DataPreprocessor } from './data-preprocessor.js';
 import { StudentData } from '../types.js';
 import { parseISO, addDays, startOfDay, endOfDay } from 'date-fns';
+import { studentProfileManager, ChatCommand } from '../student-profile.js';
 
 export interface QueryResult {
   answer: string;
@@ -128,24 +129,44 @@ export class VLLMQueryEngine {
     return undefined;
   }
 
-  private async generatePrompt(query: string, context: SearchResult[]): Promise<string> {
+  private async generatePrompt(query: string, context: SearchResult[], studentId?: string): Promise<string> {
     const contextText = context
       .map(r => r.document)
       .join('\n\n');
 
-    return `You are a helpful Canvas LMS assistant. Answer the student's question based ONLY on the provided context about their assignments and courses. Be specific and accurate.
+    // Use personalized prompt if student profile exists
+    if (studentId) {
+      const profile = await studentProfileManager.getProfile(studentId);
+      if (profile) {
+        return studentProfileManager.generatePersonalizedPrompt(query, contextText, profile);
+      }
+    }
+
+    // Fallback to default prompt
+    return `You are CanvasBot, your dedicated AI assignment helper designed to maximize your academic success. I specialize in helping students stay organized, track assignments, manage deadlines, and optimize their study time through intelligent calendar and tracking features.
 
 CONTEXT:
 ${contextText}
 
 STUDENT QUESTION: ${query}
 
-INSTRUCTIONS:
-1. Answer based ONLY on the information provided in the context
-2. If listing assignments, include their due dates and submission status
-3. Be concise but complete
-4. If the context doesn't contain enough information to answer, say so
-5. Format lists clearly with bullet points or numbering
+MY CORE CAPABILITIES:
+📋 Assignment Tracking & Organization - I help you see exactly what's due and when
+📅 Calendar View & Scheduling - I provide timeline perspectives and study planning
+⏰ Due Date Awareness & Reminders - I highlight urgent items and upcoming deadlines
+📊 Progress Tracking & Completion Status - I monitor your submission progress
+📚 Study Planning & Time Management - I help optimize your academic workflow
+🎯 Assignment Prioritization - I help you focus on what matters most
+
+INSTRUCTIONS FOR STUDENT SUCCESS:
+1. Answer based ONLY on the provided context about your Canvas assignments and courses
+2. When listing assignments, ALWAYS include due dates, submission status, and urgency level
+3. Prioritize assignments by due date proximity and completion status
+4. Highlight overdue or urgent items with clear warnings (🚨 OVERDUE, ⚠️ DUE SOON)
+5. Provide study planning recommendations when relevant
+6. Format information for easy scanning with clear visual hierarchy
+7. If context is insufficient, specify what additional information would help
+8. Focus on actionable insights that support your academic success
 
 ANSWER:`;
   }
@@ -199,10 +220,33 @@ ANSWER:`;
     }
   }
 
-  async query(userQuery: string): Promise<QueryResult> {
+  async query(userQuery: string, studentId?: string): Promise<QueryResult> {
+    // Check for chat commands first
+    if (studentId && userQuery.trim().startsWith('/')) {
+      try {
+        const command = studentProfileManager.parseCommand(userQuery);
+        if (command) {
+          const result = await studentProfileManager.processCommand(studentId, command);
+          return {
+            answer: result.message,
+            sources: [],
+            confidence: 1.0
+          };
+        }
+      } catch (error) {
+        return {
+          answer: `Command error: ${error instanceof Error ? error.message : 'Unknown error'}. Available commands: /set-personality, /set-focus, /set-reminders, /add-goal, /view-profile`,
+          sources: [],
+          confidence: 1.0
+        };
+      }
+    }
+
+    // Parse temporal and filter constraints
     const temporalFilters = this.parseTemporalQuery(userQuery);
     const submittedFilter = this.parseSubmissionFilter(userQuery);
     
+    // Search with filters if applicable
     let searchResults: SearchResult[];
     
     if (temporalFilters || submittedFilter !== undefined) {
@@ -219,6 +263,7 @@ ANSWER:`;
       searchResults = await this.vectorStore.search(userQuery, 10);
     }
 
+    // If we have specific temporal queries, also add direct data filtering
     if (temporalFilters && this.studentData) {
       const relevantAssignments = this.studentData.assignments.filter(a => {
         if (!a.due_at) return false;
@@ -239,6 +284,7 @@ ANSWER:`;
         return true;
       });
 
+      // Add these as additional context
       if (relevantAssignments.length > 0) {
         const additionalContext = relevantAssignments.map(a => {
           const course = this.studentData!.courses.find(c => c.id === a.course_id);
@@ -256,11 +302,14 @@ ANSWER:`;
       }
     }
 
-    const prompt = await this.generatePrompt(userQuery, searchResults);
+    // Generate prompt with context
+    const prompt = await this.generatePrompt(userQuery, searchResults, studentId);
     
+    // Get LLM response
     const answer = await this.generateWithVLLM(prompt);
 
-    const avgScore = searchResults.length > 0 
+    // Calculate confidence based on search relevance
+    const avgScore = searchResults.length > 0
       ? searchResults.reduce((sum, r) => sum + (1 - r.score), 0) / searchResults.length
       : 0;
 
