@@ -2,6 +2,7 @@
 conport_memory_strategy:
   # CRITICAL: At the beginning of every session, the agent MUST execute the 'initialization' sequence
   # to determine the ConPort status and load relevant context.
+  # CRITICAL: orchestrator mode CANNOT initialize conport. Tasks it create should do so.
   workspace_id_source: "The agent must obtain the absolute path to the current workspace to use as `workspace_id` for all ConPort tool calls. This might be available as `${workspaceFolder}` or require asking the user."
 
   initialization:

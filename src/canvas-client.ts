@@ -1,9 +1,26 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { 
-  CanvasConfig, Course, Assignment, Submission, Enrollment, 
-  Quiz, DiscussionTopic, Announcement, GradebookEntry,
-  SubmissionComment, SubmissionAttachment, RubricAssessment 
+import {
+  CanvasConfig,
+  Course,
+  Assignment,
+  Submission,
+  Enrollment,
+  Quiz,
+  DiscussionTopic,
+  Announcement,
+  GradebookEntry,
+  SubmissionComment,
+  SubmissionAttachment,
+  RubricAssessment
 } from './types.js';
+import {
+  RelationshipContext,
+  AcademicHierarchy,
+  RelationshipAwareOptions,
+  EnhancedCourse,
+  EnhancedAssignment,
+  EnhancedSubmission
+} from './relationship-types.js';
 
 export class CanvasClient {
   private client: AxiosInstance;
@@ -71,7 +88,7 @@ export class CanvasClient {
 
   async getAllAssignments(courseIds: number[]): Promise<Assignment[]> {
     const allAssignments: Assignment[] = [];
-    
+
     for (const courseId of courseIds) {
       try {
         const assignments = await this.getAssignments(courseId);
@@ -92,7 +109,7 @@ export class CanvasClient {
           params: {
             include: [
               'submission_comments',
-              'submission_history', 
+              'submission_history',
               'rubric_assessment',
               'assignment',
               'attachments',
@@ -133,7 +150,7 @@ export class CanvasClient {
 
   async getAllQuizzes(courseIds: number[]): Promise<Quiz[]> {
     const allQuizzes: Quiz[] = [];
-    
+
     for (const courseId of courseIds) {
       try {
         const quizzes = await this.getQuizzes(courseId);
@@ -154,7 +171,7 @@ export class CanvasClient {
 
   async getAllDiscussions(courseIds: number[]): Promise<DiscussionTopic[]> {
     const allDiscussions: DiscussionTopic[] = [];
-    
+
     for (const courseId of courseIds) {
       try {
         const discussions = await this.getDiscussions(courseId);
@@ -169,7 +186,7 @@ export class CanvasClient {
 
   async getAnnouncements(courseIds: number[]): Promise<Announcement[]> {
     if (courseIds.length === 0) return [];
-    
+
     const contextCodes = courseIds.map(id => `course_${id}`);
     return this.getAllPages<Announcement>('/announcements', {
       context_codes: contextCodes,
@@ -194,7 +211,7 @@ export class CanvasClient {
 
   async getAllGradebook(courseIds: number[]): Promise<GradebookEntry[]> {
     const allGradebook: GradebookEntry[] = [];
-    
+
     for (const courseId of courseIds) {
       try {
         const gradebook = await this.getGradebook(courseId);
