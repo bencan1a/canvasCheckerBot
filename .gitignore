@@ -39,3 +39,7 @@ cache/
 node_modules/
 venv/
 coverage/
+logs/
+dist/
+
+*.log

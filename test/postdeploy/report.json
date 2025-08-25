@@ -1,0 +1,124 @@
+{
+  "timestamp": "2025-08-25T01:33:35.306Z",
+  "checked_url": "http://localhost:3001/api/query",
+  "total_queries": 14,
+  "passed": 5,
+  "failed": 0,
+  "warnings": 9,
+  "pass_rate": 0.35714285714285715,
+  "threshold": 1,
+  "results": [
+    {
+      "id": "user_provided_list:1",
+      "query": "What should I work on first this weekend?",
+      "status": "WARN",
+      "message": "Response missing expected keywords from notes: deadline",
+      "duration_ms": 128,
+      "response_sample": "This is a mock response from the CanvasBot API. Your query has been processed successfully."
+    },
+    {
+      "id": "user_provided_list:2",
+      "query": "What assignments are overdue and how badly is that hurting my grades?",
+      "status": "PASS",
+      "message": "Query executed successfully with valid response",
+      "duration_ms": 103,
+      "response_sample": "You have 2 overdue assignments: Math Homework 3 (due 3 days ago) and Spanish Essay (due 1 day ago). These are negatively impacting your grades by approximately 15 points total."
+    },
+    {
+      "id": "user_provided_list:3",
+      "query": "Which of my missing assignments would give me the biggest grade boost if I turned them in?",
+      "status": "WARN",
+      "message": "Response missing expected keywords from notes: grade, assignments",
+      "duration_ms": 102,
+      "response_sample": "This is a mock response from the CanvasBot API. Your query has been processed successfully."
+    },
+    {
+      "id": "user_provided_list:4",
+      "query": "How am I doing in Spanish compared to my other classes?",
+      "status": "PASS",
+      "message": "Query executed successfully with valid response",
+      "duration_ms": 102,
+      "response_sample": "Your Spanish class performance (B+, 87%) is slightly above your overall GPA. Compared to your other classes: Math (92%), Science (84%), English (89%). You're doing well in Spanish relative to Science."
+    },
+    {
+      "id": "user_provided_list:5",
+      "query": "Are there any big projects coming up that I should start working on now?",
+      "status": "PASS",
+      "message": "Query executed successfully with valid response",
+      "duration_ms": 102,
+      "response_sample": "Upcoming major projects: Research Paper for English (due in 3 weeks, suggest starting research now), Science Fair Project (due in 5 weeks, topic selection recommended), Group Presentation for History ..."
+    },
+    {
+      "id": "user_provided_list:6",
+      "query": "What classes should I focus on to improve my overall GPA the most?",
+      "status": "WARN",
+      "message": "Response missing expected keywords from notes: classes, GPA",
+      "duration_ms": 102,
+      "response_sample": "This is a mock response from the CanvasBot API. Your query has been processed successfully."
+    },
+    {
+      "id": "user_provided_list:7",
+      "query": "What's due this week that I haven't started yet?",
+      "status": "WARN",
+      "message": "Response missing expected keywords from notes: deadline",
+      "duration_ms": 102,
+      "response_sample": "This week you have: Biology Lab Report (due Friday, not started), Math Problem Set 5 (due Wednesday, in progress), and History Reading Quiz (due Thursday, not started)."
+    },
+    {
+      "id": "user_provided_list:8",
+      "query": "Are there any tests or quizzes I should be studying for?",
+      "status": "WARN",
+      "message": "Response missing expected keywords from notes: study",
+      "duration_ms": 102,
+      "response_sample": "With 3 hours tonight, prioritize: 1) Math test prep (1.5 hrs) - biggest grade impact, 2) Spanish vocabulary review (45 min) - upcoming quiz, 3) Science chapter review (45 min) - reinforces weak areas."
+    },
+    {
+      "id": "user_provided_list:9",
+      "query": "What homework can I actually get done tonight vs what needs more time?",
+      "status": "PASS",
+      "message": "Query executed successfully with valid response",
+      "duration_ms": 103,
+      "response_sample": "For tonight (3 hours available): Quick tasks: Math Problem Set review (45 min), History quiz prep (30 min). Longer tasks needing more time: Biology Lab Report (2+ hours), Spanish presentation prep (90..."
+    },
+    {
+      "id": "user_provided_list:10",
+      "query": "What schoolwork do I need to catch up on?",
+      "status": "WARN",
+      "message": "Response missing expected keywords from notes: overdue, classes",
+      "duration_ms": 102,
+      "response_sample": "This is a mock response from the CanvasBot API. Your query has been processed successfully."
+    },
+    {
+      "id": "user_provided_list:11",
+      "query": "Help me plan my study schedule for the next two weeks",
+      "status": "PASS",
+      "message": "Query executed successfully with valid response",
+      "duration_ms": 102,
+      "response_sample": "With 3 hours tonight, prioritize: 1) Math test prep (1.5 hrs) - biggest grade impact, 2) Spanish vocabulary review (45 min) - upcoming quiz, 3) Science chapter review (45 min) - reinforces weak areas."
+    },
+    {
+      "id": "user_provided_list:12",
+      "query": "Which teachers are the strictest about late work and what do I owe them?",
+      "status": "WARN",
+      "message": "Response missing expected keywords from notes: teacher",
+      "duration_ms": 102,
+      "response_sample": "This is a mock response from the CanvasBot API. Your query has been processed successfully."
+    },
+    {
+      "id": "user_provided_list:13",
+      "query": "I have 3 hours to study tonight - what will help my grades the most?",
+      "status": "WARN",
+      "message": "Response missing expected keywords from notes: grade, study",
+      "duration_ms": 101,
+      "response_sample": "For tonight (3 hours available): Quick tasks: Math Problem Set review (45 min), History quiz prep (30 min). Longer tasks needing more time: Biology Lab Report (2+ hours), Spanish presentation prep (90..."
+    },
+    {
+      "id": "user_provided_list:14",
+      "query": "What would happen to my grades if I skipped the assignments due tomorrow?",
+      "status": "WARN",
+      "message": "Response missing expected keywords from notes: grade, assignments",
+      "duration_ms": 101,
+      "response_sample": "This is a mock response from the CanvasBot API. Your query has been processed successfully."
+    }
+  ]
+}

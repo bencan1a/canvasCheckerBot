@@ -1,5 +1,6 @@
 import { Ollama } from 'ollama';
-import { SimpleVectorStore as VectorStore, SearchResult } from './simple-vector-store.js';
+import { PersistentVectorStore as VectorStore } from './persistent-vector-store.js';
+import { SearchResult } from './vector-store-interface.js';
 import { DataPreprocessor } from './data-preprocessor.js';
 import { StudentData } from '../types.js';
 import { parseISO, addDays, startOfDay, endOfDay, isWithinInterval } from 'date-fns';
@@ -37,10 +38,11 @@ export class QueryEngine {
     await this.vectorStore.initialize();
     
     console.log('Processing documents...');
+    const processedChunks = this.preprocessor.processStudentData(studentData);
     const chunks = [
-      ...this.preprocessor.processStudentData(studentData),
-      this.preprocessor.getTemporalContext(),
-      ...this.preprocessor.createSummaryChunks(studentData)
+      ...processedChunks,
+      this.preprocessor.getTemporalContext('current'),
+      ...this.preprocessor.createSummaryChunks(processedChunks)
     ];
     
     console.log(`Adding ${chunks.length} document chunks to vector store...`);

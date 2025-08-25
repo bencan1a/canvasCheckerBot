@@ -1,5 +1,5 @@
 import { DocumentChunk } from './data-preprocessor.js';
-import { SearchResult } from './simple-vector-store.js';
+import { SearchResult } from './vector-store-interface.js';
 
 export interface RamCacheConfig {
   maxMemoryGB: number;

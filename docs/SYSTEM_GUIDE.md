@@ -24,7 +24,7 @@ cp .env.example .env
 
 #### Option A: Docker with Oobabooga (Recommended)
 ```bash
-./start-canvas-rag-system.sh docker oobabooga
+./manage.sh docker oobabooga
 ```
 
 #### Option B: Local with Oobabooga
@@ -33,12 +33,12 @@ cp .env.example .env
 ollama serve  # In a separate terminal
 
 # Then start the system
-./start-canvas-rag-system.sh local oobabooga
+./manage.sh local oobabooga
 ```
 
 #### Option C: API Only (for custom integrations)
 ```bash
-./start-canvas-rag-system.sh docker
+./manage.sh docker
 # or
 ./start-canvas-rag-system.sh local
 ```
@@ -98,7 +98,7 @@ OOBABOOGA_DIR=~/text-generation-webui
 ## Usage Examples
 
 ### With Oobabooga
-1. Start system: `./start-canvas-rag-system.sh local oobabooga`
+1. Start system: `./manage.sh local oobabooga`
 2. Open http://localhost:7860
 3. Chat naturally about your Canvas data
 
@@ -146,10 +146,10 @@ The system collects and indexes:
 ### Start/Stop Services
 ```bash
 # Start with Docker
-./start-canvas-rag-system.sh docker oobabooga
+./manage.sh docker oobabooga
 
 # Start locally
-./start-canvas-rag-system.sh local oobabooga
+./manage.sh local oobabooga
 
 # Stop (Ctrl+C or for Docker:)
 docker-compose down

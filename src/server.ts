@@ -7,7 +7,6 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import winston from 'winston';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 
 import { CanvasService } from './canvas-service.js';
@@ -17,8 +16,7 @@ import { CanvasConfig, StudentData } from './types.js';
 
 dotenv.config();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const baseDir = (typeof __dirname !== 'undefined') ? __dirname : path.dirname(process.argv[1] || process.cwd());
 
 // Configure Winston logger
 const logger = winston.createLogger({
@@ -123,7 +121,7 @@ export class CanvasRAGServer {
     this.app.use('/api/', limiter);
 
     // Serve static files
-    this.app.use(express.static(path.join(__dirname, '../public')));
+    this.app.use(express.static(path.join(baseDir, '../public')));
   }
 
   private setupRoutes(): void {
@@ -234,7 +232,7 @@ export class CanvasRAGServer {
 
     // Serve the main chat interface
     this.app.get('/', (req, res) => {
-      res.sendFile(path.join(__dirname, '../public/index.html'));
+      res.sendFile(path.join(baseDir, '../public/index.html'));
     });
 
     // 404 handler
@@ -439,8 +437,8 @@ export class CanvasRAGServer {
   }
 }
 
-// Auto-start if run directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+ // Auto-start if run directly
+if (typeof require !== 'undefined' && (require as any).main === module) {
   const server = new CanvasRAGServer();
   const port = parseInt(process.env.PORT || '3000');
   

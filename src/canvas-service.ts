@@ -8,8 +8,10 @@ export class CanvasService {
   private storage: LocalStorage;
   private queryEngine: CanvasQueryEngine;
 
-  constructor(config: CanvasConfig, cacheDir?: string) {
-    this.client = new CanvasClient(config);
+  constructor(config: CanvasConfig, cacheDir?: string, client?: CanvasClient) {
+    // Allow injection of a test double CanvasClient for easier integration testing.
+    // If no client is provided, instantiate the real CanvasClient with the config.
+    this.client = client ?? new CanvasClient(config);
     this.storage = new LocalStorage(cacheDir);
     this.queryEngine = new CanvasQueryEngine();
   }

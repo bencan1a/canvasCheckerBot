@@ -1,0 +1,25 @@
+{
+  "courses": [
+    { "id": 101, "name": "Linear Algebra", "course_code": "MATH101", "start_at": "2025-08-01T00:00:00.000Z" },
+    { "id": 102, "name": "Web Development", "course_code": "CS102", "start_at": "2025-08-01T00:00:00.000Z" }
+  ],
+  "assignments": [
+    {
+      "id": 201,
+      "course_id": 101,
+      "name": "Linear Algebra - Chapter 1 Read",
+      "due_at": "2025-09-01T23:59:00.000Z",
+      "description": "Read chapter 1 on linear algebra."
+    },
+    {
+      "id": 202,
+      "course_id": 102,
+      "name": "HTTP Lab",
+      "due_at": "2025-08-30T23:59:00.000Z",
+      "description": "Build a small REST API using Express."
+    }
+  ],
+  "submissions": [
+    { "assignment_id": 202, "workflow_state": "submitted", "submitted_at": "2025-08-28T12:00:00.000Z", "score": 95 }
+  ]
+}

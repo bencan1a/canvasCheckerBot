@@ -10,7 +10,7 @@ set -euo pipefail
 # =============================================================================
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+PROJECT_ROOT="$SCRIPT_DIR"
 LOG_DIR="$PROJECT_ROOT/logs"
 STATE_FILE="$LOG_DIR/orchestrator.state"
 
@@ -28,11 +28,16 @@ declare -A SERVICE_STATES
 declare -A SERVICE_CONFIGS
 declare -A CONTAINER_NAMES
 declare -A HEALTH_CHECK_URLS
+# These are used in functions but shellcheck can't detect it
+# shellcheck disable=SC2034
 declare -A SERVICE_DEPENDENCIES
+# shellcheck disable=SC2034
 declare -A FALLBACK_CONFIGS
 
 # Orchestrator state
 ORCHESTRATOR_STATE="INITIALIZING"
+# Used in start command, shellcheck can't detect usage
+# shellcheck disable=SC2034
 START_TIME=$(date +%s)
 OPERATION_MODE="FULL"  # FULL, DEGRADED, MINIMAL
 MAX_RETRIES=3
@@ -51,7 +56,8 @@ setup_logging() {
 log() {
     local level="$1"
     shift
-    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    local timestamp
+    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     local color=""
     
     case "$level" in
@@ -100,13 +106,18 @@ init_service_configs() {
     HEALTH_CHECK_URLS["canvasbot"]="http://localhost:3001/health"
     HEALTH_CHECK_URLS["open-webui"]="http://localhost:8081/health"
     
-    # Service dependencies (who depends on whom)
+    # Service dependencies (who depends on whom)  
+    # shellcheck disable=SC2034
     SERVICE_DEPENDENCIES["canvasbot"]="vllm,ollama"
+    # shellcheck disable=SC2034
     SERVICE_DEPENDENCIES["open-webui"]="canvasbot,ollama"
     
     # Fallback configurations
+    # shellcheck disable=SC2034
     FALLBACK_CONFIGS["vllm_multi_gpu"]="vllm_single_gpu"
+    # shellcheck disable=SC2034
     FALLBACK_CONFIGS["vllm_single_gpu"]="ollama_only"
+    # shellcheck disable=SC2034
     FALLBACK_CONFIGS["full_stack"]="essential_only"
 }
 
@@ -128,6 +139,7 @@ validate_environment() {
     
     # Source environment variables
     set -a
+    # shellcheck source=/dev/null
     source "$PROJECT_ROOT/.env"
     set +a
     
@@ -186,7 +198,8 @@ check_gpu_availability() {
     log "INFO" "🎮 Checking GPU availability..."
     
     if command -v nvidia-smi &> /dev/null; then
-        local gpu_count=$(nvidia-smi -L 2>/dev/null | wc -l)
+        local gpu_count
+        gpu_count=$(nvidia-smi -L 2>/dev/null | wc -l)
         if [[ $gpu_count -gt 0 ]]; then
             log "SUCCESS" "✅ Found $gpu_count GPU(s) available"
             
@@ -260,11 +273,14 @@ assess_container_state() {
             fi
         else
             # Container exists but not running
-            local stopped_time=$(docker inspect "$container_name" --format='{{.State.FinishedAt}}' 2>/dev/null || echo "")
+            local stopped_time
+            stopped_time=$(docker inspect "$container_name" --format='{{.State.FinishedAt}}' 2>/dev/null || echo "")
             if [[ -n "$stopped_time" ]]; then
                 # Check if stopped recently (within last hour)
-                local stopped_epoch=$(date -d "$stopped_time" +%s 2>/dev/null || echo "0")
-                local current_epoch=$(date +%s)
+                local stopped_epoch
+                stopped_epoch=$(date -d "$stopped_time" +%s 2>/dev/null || echo "0")
+                local current_epoch
+                current_epoch=$(date +%s)
                 local time_diff=$((current_epoch - stopped_epoch))
                 
                 if [[ $time_diff -lt 3600 ]]; then
@@ -286,13 +302,18 @@ container_is_healthy() {
     local container_name="${CONTAINER_NAMES[$service]}"
     
     # Check container health status
-    local health_status=$(docker inspect "$container_name" --format='{{.State.Health.Status}}' 2>/dev/null || echo "none")
+    local health_status
+    health_status=$(docker inspect "$container_name" --format='{{.State.Health.Status}}' 2>/dev/null || echo "none")
     
     if [[ "$health_status" == "healthy" ]]; then
         return 0
     elif [[ "$health_status" == "none" ]]; then
         # No health check defined, check if container is running
-        return $(docker ps --format "table {{.Names}}" | grep -q "^${container_name}$")
+        if docker ps --format "table {{.Names}}" | grep -q "^${container_name}$"; then
+            return 0
+        else
+            return 1
+        fi
     else
         return 1
     fi
@@ -396,7 +417,8 @@ orchestrate_startup() {
     for service in "${startup_order[@]}"; do
         log "INFO" "🚀 Processing service: $service"
         
-        local container_state=$(assess_container_state "$service")
+        local container_state
+        container_state=$(assess_container_state "$service")
         log "INFO" "📊 $service current state: $container_state"
         
         intelligent_container_action "$service" "$container_state"
@@ -556,12 +578,41 @@ generate_system_status() {
     
     echo -e "\n${CYAN}Operation Mode:${NC} $OPERATION_MODE"
     echo -e "${CYAN}Orchestrator State:${NC} $ORCHESTRATOR_STATE"
-    echo -e "${CYAN}Runtime:${NC} $(($(date +%s) - START_TIME)) seconds"
+    
+    # Get runtime from oldest running container
+    local oldest_start_time=""
+    for service in "${!CONTAINER_NAMES[@]}"; do
+        local container_name="${CONTAINER_NAMES[$service]}"
+        if docker ps --format "{{.Names}}" | grep -q "^${container_name}$"; then
+            local start_time
+            start_time=$(docker inspect -f '{{.State.StartedAt}}' "$container_name" 2>/dev/null | xargs -I {} date -d {} +%s 2>/dev/null)
+            if [[ -n "$start_time" ]]; then
+                if [[ -z "$oldest_start_time" ]] || [[ "$start_time" -lt "$oldest_start_time" ]]; then
+                    oldest_start_time="$start_time"
+                fi
+            fi
+        fi
+    done
+    
+    if [[ -n "$oldest_start_time" ]]; then
+        local runtime=$(($(date +%s) - oldest_start_time))
+        local hours=$((runtime / 3600))
+        local minutes=$(((runtime % 3600) / 60))
+        local seconds=$((runtime % 60))
+        if [[ $hours -gt 0 ]]; then
+            echo -e "${CYAN}Runtime:${NC} ${hours}h ${minutes}m ${seconds}s"
+        elif [[ $minutes -gt 0 ]]; then
+            echo -e "${CYAN}Runtime:${NC} ${minutes}m ${seconds}s"
+        else
+            echo -e "${CYAN}Runtime:${NC} ${seconds}s"
+        fi
+    fi
     
     echo -e "\n${YELLOW}Service Status:${NC}"
     for service in "${!SERVICE_STATES[@]}"; do
         local state="${SERVICE_STATES[$service]}"
-        local container_state=$(assess_container_state "$service")
+        local container_state
+        container_state=$(assess_container_state "$service")
         local health_status="❓"
         
         if perform_health_check "$service"; then
@@ -623,11 +674,16 @@ graceful_shutdown() {
     log "INFO" "🛑 Initiating graceful shutdown..."
     ORCHESTRATOR_STATE="STOPPING"
     
+    # Initialize service configs (always needed for shutdown)
+    init_service_configs
+    
     # Shutdown services in reverse dependency order
     local shutdown_order=("open-webui" "canvasbot" "vllm" "ollama")
     
     for service in "${shutdown_order[@]}"; do
-        if [[ "${SERVICE_STATES[$service]:-}" != "" ]]; then
+        # Check if container exists and is running
+        local container_name="${CONTAINER_NAMES[$service]}"
+        if docker ps --format "{{.Names}}" | grep -q "^${container_name}$"; then
             log "INFO" "🛑 Stopping $service..."
             stop_service "$service"
         fi
@@ -713,13 +769,42 @@ cmd_restart() {
 cmd_status() {
     log "INFO" "📊 Checking system status..."
     
-    if [[ ! -f "$STATE_FILE" ]]; then
-        log "WARN" "⚠️ No state file found - system may not be running"
-        exit 1
+    # Load environment variables
+    if [[ -f "$PROJECT_ROOT/.env" ]]; then
+        set -a
+        # shellcheck source=/dev/null
+        source "$PROJECT_ROOT/.env"
+        set +a
     fi
     
-    # Load current state
+    # Initialize service configurations
     init_service_configs
+    
+    # Query actual container states
+    for service in "${!CONTAINER_NAMES[@]}"; do
+        local container_state
+        container_state=$(assess_container_state "$service")
+        SERVICE_STATES["$service"]="$container_state"
+    done
+    
+    # Set orchestrator state based on services
+    local all_healthy=true
+    for service in "${!SERVICE_STATES[@]}"; do
+        if ! perform_health_check "$service"; then
+            all_healthy=false
+            break
+        fi
+    done
+    
+    if [[ "$all_healthy" == "true" ]]; then
+        ORCHESTRATOR_STATE="READY"
+        OPERATION_MODE="FULL"
+    else
+        ORCHESTRATOR_STATE="PARTIAL"
+        OPERATION_MODE="DEGRADED"
+    fi
+    
+    # Generate status report
     generate_system_status
 }
 

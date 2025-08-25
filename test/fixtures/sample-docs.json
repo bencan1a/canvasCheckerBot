@@ -1,0 +1,17 @@
+[
+  {
+    "id": "doc-1",
+    "text": "Assignment: Read chapter 1 on linear algebra. Focus on matrix multiplication and inverses.",
+    "metadata": { "type": "assignment", "courseId": 101, "dueDate": "2025-09-01T23:59:00.000Z", "submitted": false }
+  },
+  {
+    "id": "doc-2",
+    "text": "Assignment: Complete programming lab on HTTP and REST APIs. Use node and express.",
+    "metadata": { "type": "assignment", "courseId": 102, "dueDate": "2025-08-30T23:59:00.000Z", "submitted": true }
+  },
+  {
+    "id": "doc-3",
+    "text": "Course overview: History of Art. Topics include renaissance art and modern sculpture.",
+    "metadata": { "type": "course", "courseId": 103 }
+  }
+]

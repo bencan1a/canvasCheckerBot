@@ -1,46 +1,43 @@
-/** @type {import('jest').Config} */
+/**
+ * Jest configuration for CommonJS / ts-jest (minimal, CommonJS-friendly)
+ *
+ * This config was converted from an ESM-focused configuration to use ts-jest in CommonJS mode.
+ * It runs tests against the compiled/ts-jest-processed CommonJS output.
+ */
 module.exports = {
-  // Force Node.js environment (not browser/jsdom)
   testEnvironment: 'node',
-  
-  // Specify directories
-  roots: ['<rootDir>/src', '<rootDir>/test'],
-  testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
-  
-  // Critical: Transform TypeScript files with ts-jest
-  transform: {
-    '^.+\\.(ts|tsx)$': ['ts-jest', {
-      // Force CommonJS for compatibility
+
+  // Use ts-jest preset for TypeScript -> CommonJS handling
+  preset: 'ts-jest',
+
+  globals: {
+    'ts-jest': {
+      // not using ESM mode
       useESM: false,
-      tsconfig: {
-        target: 'es2020',
-        module: 'commonjs',
-        esModuleInterop: true,
-        allowSyntheticDefaultImports: true,
-        isolatedModules: true,
-        skipLibCheck: true,
-        declaration: false,
-        declarationMap: false,
-        sourceMap: false
-      }
-    }]
+      tsconfig: 'tsconfig.json',
+      diagnostics: false
+    }
   },
-  
-  // Handle module resolution
+
+  roots: ['<rootDir>/test'],
+  testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
+
+  // Transform TypeScript files using ts-jest
+  transform: {
+    '^.+\\.(ts|tsx)$': 'ts-jest'
+  },
+
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
-    // Map .js imports to .ts files
-    '^(\\.{1,2}/.*)\\.js$': '$1'
+    "^'(.*)$": '<rootDir>/src/$1',
+    '^(\\.{1,2}/.*)\\.js$': '$1'  // Map .js imports to .ts files for TypeScript
   },
-  
-  // File extensions to treat as modules
+
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
-  
-  // Clear and restore mocks for each test
+
   clearMocks: true,
   restoreMocks: true,
-  
-  // Coverage settings
+
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/**/*.d.ts',
@@ -49,18 +46,12 @@ module.exports = {
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
-  
-  // Path ignores for watch mode
+
   watchPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/dist/'],
   testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/dist/'],
-  
-  // Verbose output
+
   verbose: true,
-  
-  // Explicitly disable ESM mode to avoid conflicts
-  preset: undefined,
-  
-  // Ensure transformIgnorePatterns includes node_modules
+
   transformIgnorePatterns: [
     'node_modules/(?!(@babel/runtime)/)'
   ]

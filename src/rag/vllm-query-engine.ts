@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { SimpleVectorStore as VectorStore, SearchResult } from './simple-vector-store.js';
+import { PersistentVectorStore as VectorStore } from './persistent-vector-store.js';
+import { SearchResult } from './vector-store-interface.js';
 import { DataPreprocessor } from './data-preprocessor.js';
 import { StudentData } from '../types.js';
 import { parseISO, addDays, startOfDay, endOfDay } from 'date-fns';
@@ -50,24 +51,24 @@ export class VLLMQueryEngine {
     await this.vectorStore.initialize();
     
     console.log('Processing documents...');
-    
+
     // Process actual Canvas data
     console.log('Processing Canvas data...');
     const canvasChunks = this.preprocessor.processStudentData(studentData);
     console.log(`Generated ${canvasChunks.length} Canvas data chunks`);
-    
+
     // Add temporal context for better date understanding
-    const temporalChunk = this.preprocessor.getTemporalContext();
+    const temporalChunk = this.preprocessor.getTemporalContext('current');
     console.log('Adding temporal context chunk');
-    
+
     // Add summary chunks for overview queries
-    const summaryChunks = this.preprocessor.createSummaryChunks(studentData);
+    const summaryChunks = this.preprocessor.createSummaryChunks(canvasChunks);
     console.log(`Generated ${summaryChunks.length} summary chunks`);
-    
+
     // Combine all chunks
     const allChunks = [...canvasChunks, temporalChunk, ...summaryChunks];
     console.log(`Adding ${allChunks.length} total chunks to vector store...`);
-    
+
     await this.vectorStore.addDocuments(allChunks);
     
     console.log('Query engine ready with vLLM and Canvas data!');

@@ -1,3 +1,127 @@
+// Canvas API Error Types
+export interface CanvasApiErrorDetails {
+  message?: string;
+  errors?: Array<{
+    field?: string;
+    message: string;
+    error_code?: string;
+  }>;
+}
+
+export interface CanvasApiErrorResponse {
+  status: string;
+  errors: Array<{
+    message: string;
+    error_code?: string;
+  }>;
+}
+
+export class CanvasApiError extends Error {
+  public readonly statusCode: number;
+  public readonly errorCode?: string;
+  public readonly details?: CanvasApiErrorDetails;
+  public readonly retryAfter?: number;
+
+  constructor(
+    message: string,
+    statusCode: number,
+    errorCode?: string,
+    details?: CanvasApiErrorDetails,
+    retryAfter?: number
+  ) {
+    super(message);
+    this.name = 'CanvasApiError';
+    this.statusCode = statusCode;
+    this.errorCode = errorCode;
+    this.details = details;
+    this.retryAfter = retryAfter;
+  }
+}
+
+export class AuthenticationError extends CanvasApiError {
+  constructor(message: string = 'Authentication failed', details?: CanvasApiErrorDetails) {
+    super(message, 401, 'unauthorized', details);
+    this.name = 'AuthenticationError';
+  }
+}
+
+export class RateLimitError extends CanvasApiError {
+  constructor(message: string = 'Rate limit exceeded', retryAfter?: number, details?: CanvasApiErrorDetails) {
+    super(message, 429, 'rate_limit_exceeded', details, retryAfter);
+    this.name = 'RateLimitError';
+  }
+}
+
+export class NotFoundError extends CanvasApiError {
+  constructor(resource: string, details?: CanvasApiErrorDetails) {
+    super(`${resource} not found`, 404, 'not_found', details);
+    this.name = 'NotFoundError';
+  }
+}
+
+export class PermissionError extends CanvasApiError {
+  constructor(message: string = 'Insufficient permissions', details?: CanvasApiErrorDetails) {
+    super(message, 403, 'insufficient_permissions', details);
+    this.name = 'PermissionError';
+  }
+}
+
+export class ValidationError extends CanvasApiError {
+  constructor(message: string = 'Validation failed', details?: CanvasApiErrorDetails) {
+    super(message, 400, 'validation_error', details);
+    this.name = 'ValidationError';
+  }
+}
+
+export class ServerError extends CanvasApiError {
+  constructor(message: string = 'Internal server error', statusCode: number = 500, details?: CanvasApiErrorDetails) {
+    super(message, statusCode, 'server_error', details);
+    this.name = 'ServerError';
+  }
+}
+
+export class NetworkError extends CanvasApiError {
+  constructor(message: string = 'Network error', details?: CanvasApiErrorDetails) {
+    super(message, 0, 'network_error', details);
+    this.name = 'NetworkError';
+  }
+}
+
+// Retry configuration
+export interface RetryConfig {
+  maxRetries: number;
+  baseDelay: number;
+  maxDelay: number;
+  backoffMultiplier: number;
+  retryableStatuses: number[];
+}
+
+export const DEFAULT_RETRY_CONFIG: RetryConfig = {
+  maxRetries: 3,
+  baseDelay: 1000, // 1 second
+  maxDelay: 30000, // 30 seconds
+  backoffMultiplier: 2,
+  retryableStatuses: [429, 500, 502, 503, 504],
+};
+
+// Error recovery strategies
+export interface ErrorRecoveryOptions {
+  onRetry?: (attempt: number, error: CanvasApiError, delay: number) => void;
+  onFinalFailure?: (error: CanvasApiError) => void;
+  shouldRetry?: (error: CanvasApiError, attempt: number) => boolean;
+}
+
+export interface RequestOptions {
+  retryConfig?: Partial<RetryConfig>;
+  errorRecovery?: ErrorRecoveryOptions;
+  timeout?: number;
+}
+
+export interface CanvasConfig {
+  baseUrl: string;
+  accessToken: string;
+  studentId?: string;
+}
 export interface CanvasConfig {
   baseUrl: string;
   accessToken: string;
@@ -11,7 +135,7 @@ export interface Course {
   start_at?: string;
   end_at?: string;
   enrollment_term_id?: number;
-  workflow_state: string;
+  workflow_state: 'available' | 'completed' | 'deleted';
   term?: {
     id: number;
     name: string;
@@ -296,6 +420,23 @@ export interface StudentData {
   lastUpdated: string;
 }
 
+export interface DocumentChunk {
+  id: string;
+  text: string;
+  metadata: {
+    type: 'course' | 'assignment';
+    courseId?: number;
+    courseName?: string;
+    assignmentId?: number;
+    dueDate?: string;
+    submitted?: boolean;
+    late?: boolean;
+    missing?: boolean;
+    score?: number;
+    pointsPossible?: number;
+  };
+}
+
 export interface CacheMetadata {
   lastFullSync: string;
   lastIncrementalSync: string;
@@ -308,4 +449,144 @@ export interface QueryContext {
   courseId?: number;
   assignmentId?: number;
   includeCompleted?: boolean;
+}
+export interface GradingPeriod {
+  id: number;
+  title: string;
+  start_date: string;
+  end_date: string;
+  close_date?: string;
+  weight?: number;
+  is_closed?: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AssignmentGroup {
+  id: number;
+  name: string;
+  position: number;
+  group_weight?: number;
+  sis_source_id?: string;
+  integration_data?: Record<string, any>;
+  assignments?: Assignment[];
+  rules?: {
+    drop_lowest?: number;
+    drop_highest?: number;
+    never_drop?: number[];
+  };
+}
+
+export interface AnalyticsData {
+  by_date?: Record<string, number>;
+  by_category?: Record<string, number>;
+  courses?: number;
+  subaccounts?: number;
+  teachers?: number;
+  students?: number;
+  discussion_topics?: number;
+  media_objects?: number;
+  attachments?: number;
+  assignments?: number;
+}
+
+export interface EnrollmentTerm {
+  id: number;
+  name: string;
+  start_at?: string;
+  end_at?: string;
+  created_at: string;
+  workflow_state: 'active' | 'deleted';
+  grading_period_group_id?: number;
+  sis_term_id?: string | null;
+  overrides?: {
+    StudentEnrollment?: {
+      start_at?: string;
+      end_at?: string;
+    };
+    TeacherEnrollment?: {
+      start_at?: string | null;
+      end_at?: string;
+    };
+    TaEnrollment?: {
+      start_at?: string | null;
+      end_at?: string;
+    };
+    DesignerEnrollment?: {
+      start_at?: string | null;
+      end_at?: string;
+    };
+  };
+  course_count?: number;
+}
+
+export interface AnalyticsActivity {
+  date: string;
+  participations: number;
+  views: number;
+}
+
+export interface AnalyticsAssignment {
+  assignment_id: number;
+  title: string;
+  points_possible: number;
+  due_at?: string;
+  unlock_at?: string;
+  muted: boolean;
+  min_score?: number;
+  max_score?: number;
+  median?: number;
+  first_quartile?: number;
+  third_quartile?: number;
+  tardiness_breakdown?: {
+    on_time?: number;
+    late?: number;
+    missing?: number;
+    floating?: number;
+    total?: number;
+  };
+  submission?: {
+    posted_at?: string;
+    submitted_at?: string;
+    score?: number;
+  };
+  module_ids?: number[];
+}
+
+export interface AnalyticsStudentSummary {
+  id: number;
+  page_views: number;
+  page_views_level?: string;
+  max_page_view?: number;
+  participations: number;
+  participations_level?: string;
+  max_participations?: number;
+  tardiness_breakdown?: {
+    total?: number;
+    on_time?: number;
+    late?: number;
+    missing?: number;
+    floating?: number;
+  };
+}
+
+// VLLM Configuration Types
+export interface VLLMConfig {
+  baseUrl: string;
+  apiKey?: string;
+  model?: string;
+  maxTokens?: number;
+  temperature?: number;
+  timeout?: number;
+}
+
+// Query Result Types
+export interface QueryResult {
+  answer: string;
+  confidence: number;
+  sources: Array<{
+    content: string;
+    metadata: Record<string, any>;
+    score?: number;
+  }>;
 }

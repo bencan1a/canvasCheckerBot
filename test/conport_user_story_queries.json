@@ -1,0 +1,72 @@
+[
+  {
+    "id": "user_provided_list:1",
+    "query": "What should I work on first this weekend?",
+    "notes": "Prioritize tasks by deadline and estimated effort; useful for quick weekend planning."
+  },
+  {
+    "id": "user_provided_list:2",
+    "query": "What assignments are overdue and how badly is that hurting my grades?",
+    "notes": "Identify overdue work and estimate grade impact to prioritize catch-up."
+  },
+  {
+    "id": "user_provided_list:3",
+    "query": "Which of my missing assignments would give me the biggest grade boost if I turned them in?",
+    "notes": "Rank missing assignments by potential grade improvement to prioritize return-to-submission."
+  },
+  {
+    "id": "user_provided_list:4",
+    "query": "How am I doing in Spanish compared to my other classes?",
+    "notes": "Compare performance metrics across classes to identify strengths/weaknesses."
+  },
+  {
+    "id": "user_provided_list:5",
+    "query": "Are there any big projects coming up that I should start working on now?",
+    "notes": "Detect upcoming large work with lead time so the student can begin early planning."
+  },
+  {
+    "id": "user_provided_list:6",
+    "query": "What classes should I focus on to improve my overall GPA the most?",
+    "notes": "Recommend classes where effort yields highest GPA improvement (low-hanging fruit)."
+  },
+  {
+    "id": "user_provided_list:7",
+    "query": "What's due this week that I haven't started yet?",
+    "notes": "Show imminent deadlines and flag tasks with no progress to enable immediate action."
+  },
+  {
+    "id": "user_provided_list:8",
+    "query": "Are there any tests or quizzes I should be studying for?",
+    "notes": "Surface upcoming assessments to drive short-term study planning."
+  },
+  {
+    "id": "user_provided_list:9",
+    "query": "What homework can I actually get done tonight vs what needs more time?",
+    "notes": "Split tasks by estimated time/effort so the student can pick realistic nightly work."
+  },
+  {
+    "id": "user_provided_list:10",
+    "query": "What schoolwork do I need to catch up on?",
+    "notes": "Aggregate overdue and unstarted items across classes for a catch-up plan."
+  },
+  {
+    "id": "user_provided_list:11",
+    "query": "Help me plan my study schedule for the next two weeks",
+    "notes": "Produce a 2-week study plan balancing deadlines, test prep, and available time."
+  },
+  {
+    "id": "user_provided_list:12",
+    "query": "Which teachers are the strictest about late work and what do I owe them?",
+    "notes": "Identify teacher late-work policies and outstanding submissions per teacher."
+  },
+  {
+    "id": "user_provided_list:13",
+    "query": "I have 3 hours to study tonight - what will help my grades the most?",
+    "notes": "Prioritize study activities by expected grade benefit given a fixed time budget."
+  },
+  {
+    "id": "user_provided_list:14",
+    "query": "What would happen to my grades if I skipped the assignments due tomorrow?",
+    "notes": "Estimate short-term grade impact of skipping imminent assignments to inform tradeoffs."
+  }
+]

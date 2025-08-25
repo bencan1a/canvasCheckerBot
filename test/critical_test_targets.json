@@ -1,0 +1,98 @@
+[
+  {
+    "id": "T1",
+    "file": "src/rag/query-engine.ts",
+    "symbol": "QueryEngine.query",
+    "type": "integration",
+    "priority": 1,
+    "notes": "Core user query path: search, prompt generation, Ollama.generate integration"
+  },
+  {
+    "id": "T2",
+    "file": "src/canvas-client.ts",
+    "symbol": "CanvasClient.executeWithRetry",
+    "type": "unit",
+    "priority": 2,
+    "notes": "Retry/backoff logic and error classification for all Canvas API calls"
+  },
+  {
+    "id": "T3",
+    "file": "src/rag/data-preprocessor.ts",
+    "symbol": "DataPreprocessor.processStudentData",
+    "type": "unit",
+    "priority": 3,
+    "notes": "Transforms Canvas StudentData into DocumentChunk objects for indexing"
+  },
+  {
+    "id": "T4",
+    "file": "src/rag/cached-vector-store.ts",
+    "symbol": "CachedVectorStore.addDocuments",
+    "type": "unit",
+    "priority": 4,
+    "notes": "Batch embedding generation, caching, and fallback write-paths (error handling)"
+  },
+  {
+    "id": "T5",
+    "file": "src/rag/cached-vector-store.ts",
+    "symbol": "CachedVectorStore.search",
+    "type": "unit",
+    "priority": 5,
+    "notes": "Reads from RAM cache with fallback to persistent store"
+  },
+  {
+    "id": "T6",
+    "file": "src/rag/ram-vector-cache.ts",
+    "symbol": "RamVectorCache.search",
+    "type": "unit",
+    "priority": 6,
+    "notes": "Similarity computation and top-k selection (SIMD path, correct scoring)"
+  },
+  {
+    "id": "T7",
+    "file": "src/rag/vector-store.ts",
+    "symbol": "VectorStore.initialize",
+    "type": "integration",
+    "priority": 7,
+    "notes": "Creates Chroma collection and wiring of Ollama embedding function"
+  },
+  {
+    "id": "T8",
+    "file": "src/canvas-client.ts",
+    "symbol": "CanvasClient.parseCanvasError",
+    "type": "unit",
+    "priority": 8,
+    "notes": "Maps axios error shapes to domain error classes (Authentication/RateLimit/etc.)"
+  },
+  {
+    "id": "T9",
+    "file": "src/server.ts",
+    "symbol": "CanvasRAGServer.initializeRAGSystem",
+    "type": "integration",
+    "priority": 9,
+    "notes": "Server startup: load storage, instantiate QueryEngine, call initialize(data)"
+  },
+  {
+    "id": "T10",
+    "file": "src/server.ts",
+    "symbol": "CanvasRAGServer.socket:chat-message",
+    "type": "integration",
+    "priority": 10,
+    "notes": "Socket handler -> QueryEngine.query -> emits; verify success and error emits"
+  },
+  {
+    "id": "T11",
+    "file": "src/rag/hybrid-query-engine.ts",
+    "symbol": "HybridQueryEngine.query",
+    "type": "unit",
+    "priority": 11,
+    "notes": "Alternate RAG engine path using VLLM and confidence calculation"
+  },
+  {
+    "id": "T12",
+    "file": "src/rag/cached-vector-store.ts",
+    "symbol": "CachedVectorStore.performWarmup",
+    "type": "unit",
+    "priority": 12,
+    "notes": "Background warmup that must tolerate failures and not block initialization"
+  }
+]

@@ -16,7 +16,7 @@ cp .env.example .env
 # Edit .env with your Canvas URL and API token
 
 # 2. Start everything!
-./start-everything.sh
+./manage.sh up
 ```
 
 That's it! This will:
@@ -74,7 +74,7 @@ EMBEDDING_MODEL=nomic-embed-text
 ```bash
 # If you want Oobabooga installed elsewhere
 export OOBABOOGA_DIR=/path/to/text-generation-webui
-./start-everything.sh
+./manage.sh up
 ```
 
 ## Advanced Usage
@@ -82,12 +82,12 @@ export OOBABOOGA_DIR=/path/to/text-generation-webui
 ### Manual Control
 ```bash
 # Start with specific components
-./start-canvas-rag-system.sh full          # Everything
-./start-canvas-rag-system.sh local oobabooga  # Local only
-./start-canvas-rag-system.sh docker        # Docker mode
+./manage.sh full          # Everything
+./manage.sh local oobabooga  # Local only
+./manage.sh docker        # Docker mode
 
 # Enable network access manually
-NETWORK_ACCESS=true ./start-canvas-rag-system.sh local oobabooga
+NETWORK_ACCESS=true ./manage.sh local oobabooga
 ```
 
 ### Status & Management
@@ -173,7 +173,7 @@ Canvas LMS ──→ Canvas RAG API ──→ Oobabooga WebUI
 
 ## Next Steps
 
-1. **Start the system:** `./start-everything.sh`
+1. **Start the system:** `./manage.sh up`
 2. **Open browser:** Go to the URL shown during startup
 3. **Start chatting:** Ask about your Canvas courses!
 4. **Share access:** Give the network URL to study partners

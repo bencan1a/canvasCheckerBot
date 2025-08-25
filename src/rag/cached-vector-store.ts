@@ -1,7 +1,9 @@
 import { Ollama } from 'ollama';
 import { DocumentChunk } from './data-preprocessor.js';
-import { SimpleVectorStore, SearchResult } from './simple-vector-store.js';
+import { PersistentVectorStore } from './persistent-vector-store.js';
+import { SearchResult } from './vector-store-interface.js';
 import { RamVectorCache, RamCacheConfig } from './ram-vector-cache.js';
+import { SearchFilters } from './vector-store-interface.js';
 
 export interface CachedVectorStoreConfig {
   embeddingModel: string;
@@ -18,7 +20,7 @@ export interface CachedVectorStoreConfig {
 export class CachedVectorStore {
   private ollama: Ollama;
   private ramCache: RamVectorCache;
-  private fallbackStore: SimpleVectorStore;
+  private fallbackStore: PersistentVectorStore;
   private config: CachedVectorStoreConfig;
   private embeddingCache: Map<string, Float32Array> = new Map();
   private isWarmedUp: boolean = false;
@@ -45,7 +47,7 @@ export class CachedVectorStore {
     });
 
     this.ramCache = new RamVectorCache(this.config.ramCache);
-    this.fallbackStore = new SimpleVectorStore(this.config.embeddingModel);
+    this.fallbackStore = new PersistentVectorStore(this.config.embeddingModel);
 
     console.log(`🚀 CachedVectorStore initialized with ${this.config.ramCache.maxMemoryGB}GB RAM cache`);
   }
@@ -123,16 +125,24 @@ export class CachedVectorStore {
       return results;
       
     } catch (error) {
-      console.warn('RAM cache search failed, falling back to SimpleVectorStore:', error);
+      // Preserve the original RAM cache error to prefer surfacing it if fallback also fails
+      const originalError = error;
+      console.warn('RAM cache search failed, falling back to SimpleVectorStore:', originalError);
       
       if (this.config.fallbackToSimple) {
         const fallbackStart = performance.now();
-        const results = await this.fallbackStore.search(query, k);
-        const fallbackTime = performance.now() - fallbackStart;
-        console.log(`🔄 Fallback search completed in ${fallbackTime.toFixed(3)}ms`);
-        return results;
+        try {
+          const results = await this.fallbackStore.search(query, k);
+          const fallbackTime = performance.now() - fallbackStart;
+          console.log(`🔄 Fallback search completed in ${fallbackTime.toFixed(3)}ms`);
+          return results;
+        } catch (fallbackError) {
+          // If fallback fails, surface the original RAM cache error (as tests expect)
+          console.warn('Fallback search failed:', fallbackError);
+          throw originalError;
+        }
       } else {
-        throw error;
+        throw originalError;
       }
     }
   }
@@ -141,13 +151,8 @@ export class CachedVectorStore {
    * Search with filters using intelligent caching and fallback strategies
    */
   async searchWithFilters(
-    query: string, 
-    filters?: {
-      courseId?: number;
-      submitted?: boolean;
-      dueAfter?: Date;
-      dueBefore?: Date;
-    },
+    query: string,
+    filters?: SearchFilters,
     k: number = 5
   ): Promise<SearchResult[]> {
     const startTime = performance.now();
@@ -155,7 +160,7 @@ export class CachedVectorStore {
     try {
       // For filtered searches, use fallback store initially
       // TODO: Implement filter support in RAM cache for future optimization
-      const results = await this.fallbackStore.searchWithFilters(query, filters, k);
+      const results = await this.fallbackStore.searchWithFilters(query, (filters ?? {}) as SearchFilters, k);
       
       const searchTime = performance.now() - startTime;
       console.log(`🔍 Filtered search completed in ${searchTime.toFixed(3)}ms`);

@@ -8,7 +8,7 @@ The CanvasBot Robust Orchestration System is a comprehensive, enterprise-grade s
 
 ### Core Components
 
-1. **Orchestrator Script** (`scripts/orchestrator.sh`)
+1. **Orchestrator Script** (`./manage.sh`)
    - Intelligent container lifecycle management
    - Progressive health checking with adaptive timeouts
    - Automatic service recovery and fallback strategies
@@ -86,38 +86,38 @@ Comprehensive status reporting and logging:
 
 ```bash
 # Start all services with full validation
-./scripts/orchestrator.sh start
+./manage.sh start
 
 # Check detailed system status
-./scripts/orchestrator.sh status
+./manage.sh status
 
 # Gracefully stop all services
-./scripts/orchestrator.sh stop
+./manage.sh stop
 
 # Restart with full orchestration
-./scripts/orchestrator.sh restart
+./manage.sh restart
 
 # Validate environment and configuration
-./scripts/orchestrator.sh validate
+./manage.sh validate
 
 # Monitor orchestrator logs
-./scripts/orchestrator.sh logs
+./manage.sh logs
 
 # Show help and features
-./scripts/orchestrator.sh help
+./manage.sh help
 ```
 
 ### Advanced Usage
 
 ```bash
 # Start with specific operation mode
-OPERATION_MODE=NORMAL ./scripts/orchestrator.sh start
+OPERATION_MODE=NORMAL ./manage.sh start
 
 # Enable debug logging
-DEBUG=true ./scripts/orchestrator.sh start
+DEBUG=true ./manage.sh start
 
 # Force container recreation
-FORCE_RECREATE=true ./scripts/orchestrator.sh start
+FORCE_RECREATE=true ./manage.sh start
 ```
 
 ## Startup Flow

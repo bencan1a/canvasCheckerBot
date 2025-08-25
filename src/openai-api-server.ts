@@ -392,8 +392,8 @@ export class CanvasRAGAPIServer {
   }
 }
 
-// Auto-start if run directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+ // Auto-start if run directly
+if (typeof require !== 'undefined' && (require as any).main === module) {
   const server = new CanvasRAGAPIServer();
   const port = parseInt(process.env.PORT || '3001');
   

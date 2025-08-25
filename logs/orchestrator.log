@@ -304,3 +304,540 @@ EXAMPLES:
   1. Check logs: [0;36mtail -f /home/bencan/projects/canvasCheckerBot/logs/orchestrator.log[0m
   2. Restart services: [0;36m./scripts/orchestrator.sh restart[0m
   3. Check configuration: [0;36m./scripts/orchestrator.sh validate[0m
+[0;35m
+╔══════════════════════════════════════════════════════════════╗
+║                    CanvasBot Orchestrator                    ║
+║              Robust Startup & Recovery System               ║
+╚══════════════════════════════════════════════════════════════╝
+[0m
+[0;36m[2025-08-24 18:34:56] [INFO] 🚀 Starting CanvasBot system with robust orchestration...[0m
+[0;36m[2025-08-24 18:34:56] [INFO] 🔍 Starting comprehensive environment validation...[0m
+[0;32m[2025-08-24 18:34:56] [SUCCESS] ✅ Canvas credentials found[0m
+[0;32m[2025-08-24 18:34:56] [SUCCESS] ✅ Docker is available and running[0m
+[0;32m[2025-08-24 18:34:56] [SUCCESS] ✅ Docker Compose available[0m
+[0;36m[2025-08-24 18:34:56] [INFO] 🎮 Checking GPU availability...[0m
+[0;32m[2025-08-24 18:34:56] [SUCCESS] ✅ Found 3 GPU(s) available[0m
+[0;36m[2025-08-24 18:34:56] [INFO] 🔗 Multi-GPU detected, checking NCCL compatibility...[0m
+[1;33m[2025-08-24 18:34:56] [WARN] ⚠️ Multi-GPU vLLM configured - will attempt with fallback to single GPU[0m
+[0;36m[2025-08-24 18:34:56] [INFO] 🔌 Checking port availability...[0m
+[0;32m[2025-08-24 18:34:56] [SUCCESS] ✅ All required ports are available[0m
+[0;36m[2025-08-24 18:34:56] [INFO] 🤖 Validating model configuration...[0m
+[0;36m[2025-08-24 18:34:56] [INFO] 📋 vLLM Model: Qwen/Qwen2.5-32B-Instruct-AWQ[0m
+[0;36m[2025-08-24 18:34:56] [INFO] 📋 Embedding Model: nomic-embed-text[0m
+[0;32m[2025-08-24 18:34:56] [SUCCESS] ✅ Model configuration validated[0m
+[0;32m[2025-08-24 18:34:56] [SUCCESS] ✅ Environment validation passed[0m
+[0;36m[2025-08-24 18:34:56] [INFO] 🎼 Starting service orchestration...[0m
+[0;36m[2025-08-24 18:34:56] [INFO] 🚀 Processing service: ollama[0m
+[0;36m[2025-08-24 18:34:56] [INFO] 📊 ollama current state: MISSING[0m
+[0;36m[2025-08-24 18:34:56] [INFO] 🆕 ollama container missing, creating new[0m
+[0;36m[2025-08-24 18:34:56] [INFO] 🆕 Creating new ollama container...[0m
+[0;32m[2025-08-24 18:34:57] [SUCCESS] ✅ Successfully created ollama container[0m
+[0;36m[2025-08-24 18:34:57] [INFO] ⏳ Waiting for ollama to be ready...[0m
+[0;32m[2025-08-24 18:34:57] [SUCCESS] ✅ ollama is ready[0m
+[0;36m[2025-08-24 18:34:57] [INFO] 🚀 Processing service: vllm[0m
+[0;36m[2025-08-24 18:34:57] [INFO] 📊 vllm current state: STOPPED_STALE[0m
+[0;36m[2025-08-24 18:34:57] [INFO] 🗑️ vllm container is stale, recreating[0m
+[0;36m[2025-08-24 18:34:57] [INFO] 🗑️ Removing stale vllm container...[0m
+[0;36m[2025-08-24 18:34:57] [INFO] 🆕 Creating new vllm container...[0m
+[0;32m[2025-08-24 18:34:58] [SUCCESS] ✅ Successfully created vllm container[0m
+[0;36m[2025-08-24 18:34:58] [INFO] ⏳ Waiting for vllm to be ready...[0m
+[0;32m[2025-08-24 18:34:58] [SUCCESS] ✅ vllm is ready[0m
+[0;36m[2025-08-24 18:34:58] [INFO] 🚀 Processing service: canvasbot[0m
+[0;36m[2025-08-24 18:34:58] [INFO] 📊 canvasbot current state: MISSING[0m
+[0;36m[2025-08-24 18:34:58] [INFO] 🆕 canvasbot container missing, creating new[0m
+[0;36m[2025-08-24 18:34:58] [INFO] 🆕 Creating new canvasbot container...[0m
+[0;31m[2025-08-24 18:34:58] [ERROR] ❌ Failed to create canvasbot container[0m
+[0;31m[2025-08-24 18:34:58] [ERROR] 💥 Service failure detected for: canvasbot[0m
+[0;31m[2025-08-24 18:34:58] [ERROR] 🚨 Essential service canvasbot failed - attempting recovery[0m
+[0;36m[2025-08-24 18:34:58] [INFO] 🔄 Attempting recovery for canvasbot (retry 1/3)[0m
+[0;36m[2025-08-24 18:34:58] [INFO] 🗑️ Removing stale canvasbot container...[0m
+[0;36m[2025-08-24 18:34:58] [INFO] 🆕 Creating new canvasbot container...[0m
+[0;31m[2025-08-24 18:34:59] [ERROR] ❌ Failed to create canvasbot container[0m
+[0;31m[2025-08-24 18:34:59] [ERROR] 💥 Service failure detected for: canvasbot[0m
+[0;31m[2025-08-24 18:34:59] [ERROR] 🚨 Essential service canvasbot failed - attempting recovery[0m
+[0;36m[2025-08-24 18:34:59] [INFO] 🔄 Attempting recovery for canvasbot (retry 2/3)[0m
+[0;36m[2025-08-24 18:34:59] [INFO] 🗑️ Removing stale canvasbot container...[0m
+[0;36m[2025-08-24 18:34:59] [INFO] 🆕 Creating new canvasbot container...[0m
+[0;31m[2025-08-24 18:35:00] [ERROR] ❌ Failed to create canvasbot container[0m
+[0;31m[2025-08-24 18:35:00] [ERROR] 💥 Service failure detected for: canvasbot[0m
+[0;31m[2025-08-24 18:35:00] [ERROR] 🚨 Essential service canvasbot failed - attempting recovery[0m
+[0;36m[2025-08-24 18:35:00] [INFO] 🔄 Attempting recovery for canvasbot (retry 3/3)[0m
+[0;36m[2025-08-24 18:35:00] [INFO] 🗑️ Removing stale canvasbot container...[0m
+[0;36m[2025-08-24 18:35:00] [INFO] 🆕 Creating new canvasbot container...[0m
+[0;31m[2025-08-24 18:35:00] [ERROR] ❌ Failed to create canvasbot container[0m
+[0;31m[2025-08-24 18:35:00] [ERROR] 💥 Service failure detected for: canvasbot[0m
+[0;31m[2025-08-24 18:35:00] [ERROR] 🚨 Essential service canvasbot failed - attempting recovery[0m
+[0;31m[2025-08-24 18:35:00] [ERROR] 💀 Max retries exceeded for canvasbot - entering degraded mode[0m
+[0;36m[2025-08-24 18:35:00] [INFO] ⏳ Waiting for canvasbot to be ready...[0m
+[0;32m[2025-08-24 18:35:00] [SUCCESS] ✅ canvasbot is ready[0m
+[0;36m[2025-08-24 18:35:00] [INFO] ⏳ Waiting for canvasbot to be ready...[0m
+[0;32m[2025-08-24 18:35:00] [SUCCESS] ✅ canvasbot is ready[0m
+[0;36m[2025-08-24 18:35:00] [INFO] ⏳ Waiting for canvasbot to be ready...[0m
+[0;32m[2025-08-24 18:35:00] [SUCCESS] ✅ canvasbot is ready[0m
+[0;36m[2025-08-24 18:35:00] [INFO] ⏳ Waiting for canvasbot to be ready...[0m
+[0;32m[2025-08-24 18:35:00] [SUCCESS] ✅ canvasbot is ready[0m
+[0;36m[2025-08-24 18:35:00] [INFO] 🚀 Processing service: open-webui[0m
+[0;36m[2025-08-24 18:35:00] [INFO] 📊 open-webui current state: MISSING[0m
+[0;36m[2025-08-24 18:35:00] [INFO] 🆕 open-webui container missing, creating new[0m
+[0;36m[2025-08-24 18:35:00] [INFO] 🆕 Creating new open-webui container...[0m
+[0;31m[2025-08-24 18:35:01] [ERROR] ❌ Failed to create open-webui container[0m
+[0;31m[2025-08-24 18:35:01] [ERROR] 💥 Service failure detected for: open-webui[0m
+[1;33m[2025-08-24 18:35:01] [WARN] ⚠️ Secondary service open-webui failed - continuing without it[0m
+[0;32m[2025-08-24 18:35:01] [SUCCESS] ✅ Service orchestration completed[0m
+[0;36m[2025-08-24 18:35:01] [INFO] 📊 Generating system status report...[0m
+
+[0;34m╔══════════════════════════════════════════════╗[0m
+[0;34m║                System Status                 ║[0m
+[0;34m╚══════════════════════════════════════════════╝[0m
+
+[0;36mOperation Mode:[0m DEGRADED
+[0;36mOrchestrator State:[0m STARTING
+[0;36mRuntime:[0m 5 seconds
+
+[1;33mService Status:[0m
+  ✅ ollama: CREATED (UNHEALTHY)
+  ✅ vllm: RECREATED (UNHEALTHY)
+  ✅ canvasbot: CREATED (STOPPED_STALE)
+  ❌ open-webui: CREATED (MISSING)
+
+[1;33mService URLs:[0m
+  🤖 CanvasBot API: http://localhost:3001
+  🌐 Open WebUI: http://localhost:8081
+  ⚡ vLLM API: http://localhost:8000
+  🧠 Ollama API: http://localhost:11435
+
+[0;32m✅ No critical issues detected[0m
+[0;32m[2025-08-24 18:35:01] [SUCCESS] 🎉 CanvasBot system startup completed successfully![0m
+[0;36m[2025-08-24 18:36:11] [INFO] 📊 Checking system status...[0m
+[0;36m[2025-08-24 18:36:11] [INFO] 📊 Generating system status report...[0m
+
+[0;34m╔══════════════════════════════════════════════╗[0m
+[0;34m║                System Status                 ║[0m
+[0;34m╚══════════════════════════════════════════════╝[0m
+
+[0;36mOperation Mode:[0m FULL
+[0;36mOrchestrator State:[0m INITIALIZING
+[0;36mRuntime:[0m 0 seconds
+
+[1;33mService Status:[0m
+
+[1;33mService URLs:[0m
+  🤖 CanvasBot API: http://localhost:3001
+  🌐 Open WebUI: http://localhost:8081
+  ⚡ vLLM API: http://localhost:8000
+  🧠 Ollama API: http://localhost:11435
+
+[0;31m⚠️ Critical Issues Detected:[0m
+  ❌ Canvas access token not configured
+
+[1;33m💡 Troubleshooting Steps:[0m
+  1. Check logs: [0;36mtail -f /home/bencan/projects/canvasCheckerBot/logs/orchestrator.log[0m
+  2. Restart services: [0;36m./manage.sh restart[0m
+  3. Check configuration: [0;36m./manage.sh validate[0m
+[0;36m[2025-08-24 18:37:13] [INFO] 🔍 Running environment validation...[0m
+[0;36m[2025-08-24 18:37:13] [INFO] 🔍 Starting comprehensive environment validation...[0m
+[0;32m[2025-08-24 18:37:13] [SUCCESS] ✅ Canvas credentials found[0m
+[0;32m[2025-08-24 18:37:13] [SUCCESS] ✅ Docker is available and running[0m
+[0;32m[2025-08-24 18:37:13] [SUCCESS] ✅ Docker Compose available[0m
+[0;36m[2025-08-24 18:37:13] [INFO] 🎮 Checking GPU availability...[0m
+[0;32m[2025-08-24 18:37:13] [SUCCESS] ✅ Found 3 GPU(s) available[0m
+[0;36m[2025-08-24 18:37:13] [INFO] 🔗 Multi-GPU detected, checking NCCL compatibility...[0m
+[1;33m[2025-08-24 18:37:13] [WARN] ⚠️ Multi-GPU vLLM configured - will attempt with fallback to single GPU[0m
+[0;36m[2025-08-24 18:37:13] [INFO] 🔌 Checking port availability...[0m
+[0;32m[2025-08-24 18:37:13] [SUCCESS] ✅ All required ports are available[0m
+[0;36m[2025-08-24 18:37:13] [INFO] 🤖 Validating model configuration...[0m
+[0;36m[2025-08-24 18:37:13] [INFO] 📋 vLLM Model: Qwen/Qwen2.5-32B-Instruct-AWQ[0m
+[0;36m[2025-08-24 18:37:13] [INFO] 📋 Embedding Model: nomic-embed-text[0m
+[0;32m[2025-08-24 18:37:13] [SUCCESS] ✅ Model configuration validated[0m
+[0;32m[2025-08-24 18:37:13] [SUCCESS] ✅ Environment validation passed[0m
+[0;32m[2025-08-24 18:37:13] [SUCCESS] ✅ Environment validation passed[0m
+[0;35m
+╔══════════════════════════════════════════════════════════════╗
+║                    CanvasBot Orchestrator                    ║
+║              Robust Startup & Recovery System               ║
+╚══════════════════════════════════════════════════════════════╝
+[0m
+[0;36m[2025-08-24 18:37:18] [INFO] 🚀 Starting CanvasBot system with robust orchestration...[0m
+[0;36m[2025-08-24 18:37:18] [INFO] 🔍 Starting comprehensive environment validation...[0m
+[0;32m[2025-08-24 18:37:18] [SUCCESS] ✅ Canvas credentials found[0m
+[0;32m[2025-08-24 18:37:18] [SUCCESS] ✅ Docker is available and running[0m
+[0;32m[2025-08-24 18:37:18] [SUCCESS] ✅ Docker Compose available[0m
+[0;36m[2025-08-24 18:37:18] [INFO] 🎮 Checking GPU availability...[0m
+[0;32m[2025-08-24 18:37:18] [SUCCESS] ✅ Found 3 GPU(s) available[0m
+[0;36m[2025-08-24 18:37:18] [INFO] 🔗 Multi-GPU detected, checking NCCL compatibility...[0m
+[1;33m[2025-08-24 18:37:18] [WARN] ⚠️ Multi-GPU vLLM configured - will attempt with fallback to single GPU[0m
+[0;36m[2025-08-24 18:37:18] [INFO] 🔌 Checking port availability...[0m
+[0;32m[2025-08-24 18:37:18] [SUCCESS] ✅ All required ports are available[0m
+[0;36m[2025-08-24 18:37:18] [INFO] 🤖 Validating model configuration...[0m
+[0;36m[2025-08-24 18:37:18] [INFO] 📋 vLLM Model: Qwen/Qwen2.5-32B-Instruct-AWQ[0m
+[0;36m[2025-08-24 18:37:18] [INFO] 📋 Embedding Model: nomic-embed-text[0m
+[0;32m[2025-08-24 18:37:18] [SUCCESS] ✅ Model configuration validated[0m
+[0;32m[2025-08-24 18:37:18] [SUCCESS] ✅ Environment validation passed[0m
+[0;36m[2025-08-24 18:37:18] [INFO] 🎼 Starting service orchestration...[0m
+[0;36m[2025-08-24 18:37:18] [INFO] 🚀 Processing service: ollama[0m
+[0;36m[2025-08-24 18:37:18] [INFO] 📊 ollama current state: HEALTHY[0m
+[0;32m[2025-08-24 18:37:18] [SUCCESS] ✅ ollama container is healthy, reusing existing[0m
+[0;36m[2025-08-24 18:37:18] [INFO] ⏳ Waiting for ollama to be ready...[0m
+[0;32m[2025-08-24 18:37:18] [SUCCESS] ✅ ollama is ready[0m
+[0;36m[2025-08-24 18:37:18] [INFO] 🚀 Processing service: vllm[0m
+[0;36m[2025-08-24 18:37:18] [INFO] 📊 vllm current state: UNHEALTHY[0m
+[1;33m[2025-08-24 18:37:18] [WARN] ⚠️ vllm container is unhealthy, attempting restart[0m
+[0;36m[2025-08-24 18:37:18] [INFO] 🔄 Restarting vllm container...[0m
+[0;32m[2025-08-24 18:37:29] [SUCCESS] ✅ Successfully restarted vllm[0m
+[0;36m[2025-08-24 18:37:29] [INFO] ⏳ Waiting for vllm to be ready...[0m
+[0;32m[2025-08-24 18:37:29] [SUCCESS] ✅ vllm is ready[0m
+[0;36m[2025-08-24 18:37:29] [INFO] 🚀 Processing service: canvasbot[0m
+[0;36m[2025-08-24 18:37:29] [INFO] 📊 canvasbot current state: STOPPED_STALE[0m
+[0;36m[2025-08-24 18:37:29] [INFO] 🗑️ canvasbot container is stale, recreating[0m
+[0;36m[2025-08-24 18:37:29] [INFO] 🗑️ Removing stale canvasbot container...[0m
+[0;36m[2025-08-24 18:37:29] [INFO] 🆕 Creating new canvasbot container...[0m
+[0;31m[2025-08-24 18:37:30] [ERROR] ❌ Failed to create canvasbot container[0m
+[0;31m[2025-08-24 18:37:30] [ERROR] 💥 Service failure detected for: canvasbot[0m
+[0;31m[2025-08-24 18:37:30] [ERROR] 🚨 Essential service canvasbot failed - attempting recovery[0m
+[0;36m[2025-08-24 18:37:30] [INFO] 🔄 Attempting recovery for canvasbot (retry 1/3)[0m
+[0;36m[2025-08-24 18:37:30] [INFO] 🗑️ Removing stale canvasbot container...[0m
+[0;36m[2025-08-24 18:37:30] [INFO] 🆕 Creating new canvasbot container...[0m
+[0;31m[2025-08-24 18:37:30] [ERROR] ❌ Failed to create canvasbot container[0m
+[0;31m[2025-08-24 18:37:30] [ERROR] 💥 Service failure detected for: canvasbot[0m
+[0;31m[2025-08-24 18:37:30] [ERROR] 🚨 Essential service canvasbot failed - attempting recovery[0m
+[0;36m[2025-08-24 18:37:30] [INFO] 🔄 Attempting recovery for canvasbot (retry 2/3)[0m
+[0;36m[2025-08-24 18:37:30] [INFO] 🗑️ Removing stale canvasbot container...[0m
+[0;36m[2025-08-24 18:37:30] [INFO] 🆕 Creating new canvasbot container...[0m
+[0;31m[2025-08-24 18:37:31] [ERROR] ❌ Failed to create canvasbot container[0m
+[0;31m[2025-08-24 18:37:31] [ERROR] 💥 Service failure detected for: canvasbot[0m
+[0;31m[2025-08-24 18:37:31] [ERROR] 🚨 Essential service canvasbot failed - attempting recovery[0m
+[0;36m[2025-08-24 18:37:31] [INFO] 🔄 Attempting recovery for canvasbot (retry 3/3)[0m
+[0;36m[2025-08-24 18:37:31] [INFO] 🗑️ Removing stale canvasbot container...[0m
+[0;36m[2025-08-24 18:37:31] [INFO] 🆕 Creating new canvasbot container...[0m
+[0;31m[2025-08-24 18:37:31] [ERROR] ❌ Failed to create canvasbot container[0m
+[0;31m[2025-08-24 18:37:31] [ERROR] 💥 Service failure detected for: canvasbot[0m
+[0;31m[2025-08-24 18:37:31] [ERROR] 🚨 Essential service canvasbot failed - attempting recovery[0m
+[0;31m[2025-08-24 18:37:31] [ERROR] 💀 Max retries exceeded for canvasbot - entering degraded mode[0m
+[0;36m[2025-08-24 18:37:31] [INFO] ⏳ Waiting for canvasbot to be ready...[0m
+[0;32m[2025-08-24 18:37:31] [SUCCESS] ✅ canvasbot is ready[0m
+[0;36m[2025-08-24 18:37:31] [INFO] ⏳ Waiting for canvasbot to be ready...[0m
+[0;32m[2025-08-24 18:37:31] [SUCCESS] ✅ canvasbot is ready[0m
+[0;36m[2025-08-24 18:37:31] [INFO] ⏳ Waiting for canvasbot to be ready...[0m
+[0;32m[2025-08-24 18:37:31] [SUCCESS] ✅ canvasbot is ready[0m
+[0;36m[2025-08-24 18:37:31] [INFO] ⏳ Waiting for canvasbot to be ready...[0m
+[0;32m[2025-08-24 18:37:31] [SUCCESS] ✅ canvasbot is ready[0m
+[0;36m[2025-08-24 18:37:31] [INFO] 🚀 Processing service: open-webui[0m
+[0;36m[2025-08-24 18:37:31] [INFO] 📊 open-webui current state: MISSING[0m
+[0;36m[2025-08-24 18:37:31] [INFO] 🆕 open-webui container missing, creating new[0m
+[0;36m[2025-08-24 18:37:31] [INFO] 🆕 Creating new open-webui container...[0m
+[0;31m[2025-08-24 18:37:32] [ERROR] ❌ Failed to create open-webui container[0m
+[0;31m[2025-08-24 18:37:32] [ERROR] 💥 Service failure detected for: open-webui[0m
+[1;33m[2025-08-24 18:37:32] [WARN] ⚠️ Secondary service open-webui failed - continuing without it[0m
+[0;32m[2025-08-24 18:37:32] [SUCCESS] ✅ Service orchestration completed[0m
+[0;36m[2025-08-24 18:37:32] [INFO] 📊 Generating system status report...[0m
+
+[0;34m╔══════════════════════════════════════════════╗[0m
+[0;34m║                System Status                 ║[0m
+[0;34m╚══════════════════════════════════════════════╝[0m
+
+[0;36mOperation Mode:[0m DEGRADED
+[0;36mOrchestrator State:[0m STARTING
+[0;36mRuntime:[0m 14 seconds
+
+[1;33mService Status:[0m
+  ✅ ollama: REUSED (HEALTHY)
+  ✅ vllm: RESTARTED (UNHEALTHY)
+  ✅ canvasbot: RECREATED (STOPPED_STALE)
+  ❌ open-webui: CREATED (MISSING)
+
+[1;33mService URLs:[0m
+  🤖 CanvasBot API: http://localhost:3001
+  🌐 Open WebUI: http://localhost:8081
+  ⚡ vLLM API: http://localhost:8000
+  🧠 Ollama API: http://localhost:11435
+
+[0;32m✅ No critical issues detected[0m
+[0;35m
+╔══════════════════════════════════════════════════════════════╗
+║                    CanvasBot Orchestrator                    ║
+║              Robust Startup & Recovery System               ║
+╚══════════════════════════════════════════════════════════════╝
+[0m
+[0;36m[2025-08-24 18:38:17] [INFO] 🚀 Starting CanvasBot system with robust orchestration...[0m
+[0;36m[2025-08-24 18:38:17] [INFO] 🔍 Starting comprehensive environment validation...[0m
+[0;32m[2025-08-24 18:38:17] [SUCCESS] ✅ Canvas credentials found[0m
+[0;32m[2025-08-24 18:38:17] [SUCCESS] ✅ Docker is available and running[0m
+[0;32m[2025-08-24 18:38:17] [SUCCESS] ✅ Docker Compose available[0m
+[0;36m[2025-08-24 18:38:17] [INFO] 🎮 Checking GPU availability...[0m
+[0;32m[2025-08-24 18:38:17] [SUCCESS] ✅ Found 3 GPU(s) available[0m
+[0;36m[2025-08-24 18:38:17] [INFO] 🔗 Multi-GPU detected, checking NCCL compatibility...[0m
+[1;33m[2025-08-24 18:38:17] [WARN] ⚠️ Multi-GPU vLLM configured - will attempt with fallback to single GPU[0m
+[0;36m[2025-08-24 18:38:17] [INFO] 🔌 Checking port availability...[0m
+[0;32m[2025-08-24 18:38:17] [SUCCESS] ✅ All required ports are available[0m
+[0;36m[2025-08-24 18:38:17] [INFO] 🤖 Validating model configuration...[0m
+[0;36m[2025-08-24 18:38:17] [INFO] 📋 vLLM Model: Qwen/Qwen2.5-32B-Instruct-AWQ[0m
+[0;36m[2025-08-24 18:38:17] [INFO] 📋 Embedding Model: nomic-embed-text[0m
+[0;32m[2025-08-24 18:38:17] [SUCCESS] ✅ Model configuration validated[0m
+[0;32m[2025-08-24 18:38:17] [SUCCESS] ✅ Environment validation passed[0m
+[0;36m[2025-08-24 18:38:17] [INFO] 🎼 Starting service orchestration...[0m
+[0;36m[2025-08-24 18:38:17] [INFO] 🚀 Processing service: ollama[0m
+[0;36m[2025-08-24 18:38:17] [INFO] 📊 ollama current state: HEALTHY[0m
+[0;32m[2025-08-24 18:38:17] [SUCCESS] ✅ ollama container is healthy, reusing existing[0m
+[0;36m[2025-08-24 18:38:17] [INFO] ⏳ Waiting for ollama to be ready...[0m
+[0;32m[2025-08-24 18:38:17] [SUCCESS] ✅ ollama is ready[0m
+[0;36m[2025-08-24 18:38:17] [INFO] 🚀 Processing service: vllm[0m
+[0;36m[2025-08-24 18:38:17] [INFO] 📊 vllm current state: UNHEALTHY[0m
+[1;33m[2025-08-24 18:38:17] [WARN] ⚠️ vllm container is unhealthy, attempting restart[0m
+[0;36m[2025-08-24 18:38:17] [INFO] 🔄 Restarting vllm container...[0m
+[0;32m[2025-08-24 18:38:28] [SUCCESS] ✅ Successfully restarted vllm[0m
+[0;36m[2025-08-24 18:38:28] [INFO] ⏳ Waiting for vllm to be ready...[0m
+[0;32m[2025-08-24 18:38:28] [SUCCESS] ✅ vllm is ready[0m
+[0;36m[2025-08-24 18:38:28] [INFO] 🚀 Processing service: canvasbot[0m
+[0;36m[2025-08-24 18:38:28] [INFO] 📊 canvasbot current state: STOPPED_STALE[0m
+[0;36m[2025-08-24 18:38:28] [INFO] 🗑️ canvasbot container is stale, recreating[0m
+[0;36m[2025-08-24 18:38:28] [INFO] 🗑️ Removing stale canvasbot container...[0m
+[0;36m[2025-08-24 18:38:28] [INFO] 🆕 Creating new canvasbot container...[0m
+[0;32m[2025-08-24 18:38:28] [SUCCESS] ✅ Successfully created canvasbot container[0m
+[0;36m[2025-08-24 18:38:28] [INFO] ⏳ Waiting for canvasbot to be ready...[0m
+[0;36m[2025-08-24 18:38:38] [INFO] ⏳ Still waiting for canvasbot... (10s/300s)[0m
+[0;32m[2025-08-24 18:38:38] [SUCCESS] ✅ canvasbot is ready[0m
+[0;36m[2025-08-24 18:38:38] [INFO] 🚀 Processing service: open-webui[0m
+[0;36m[2025-08-24 18:38:38] [INFO] 📊 open-webui current state: MISSING[0m
+[0;36m[2025-08-24 18:38:38] [INFO] 🆕 open-webui container missing, creating new[0m
+[0;36m[2025-08-24 18:38:38] [INFO] 🆕 Creating new open-webui container...[0m
+[0;32m[2025-08-24 18:38:39] [SUCCESS] ✅ Successfully created open-webui container[0m
+[0;32m[2025-08-24 18:38:39] [SUCCESS] ✅ Service orchestration completed[0m
+[0;36m[2025-08-24 18:38:39] [INFO] 📊 Generating system status report...[0m
+
+[0;34m╔══════════════════════════════════════════════╗[0m
+[0;34m║                System Status                 ║[0m
+[0;34m╚══════════════════════════════════════════════╝[0m
+
+[0;36mOperation Mode:[0m FULL
+[0;36mOrchestrator State:[0m STARTING
+[0;36mRuntime:[0m 22 seconds
+
+[1;33mService Status:[0m
+  ✅ ollama: REUSED (HEALTHY)
+  ✅ vllm: RESTARTED (UNHEALTHY)
+  ✅ canvasbot: RECREATED (HEALTHY)
+  ❌ open-webui: CREATED (UNHEALTHY)
+
+[1;33mService URLs:[0m
+  🤖 CanvasBot API: http://localhost:3001
+  🌐 Open WebUI: http://localhost:8081
+  ⚡ vLLM API: http://localhost:8000
+  🧠 Ollama API: http://localhost:11435
+
+[0;32m✅ No critical issues detected[0m
+[0;32m[2025-08-24 18:38:39] [SUCCESS] 🎉 CanvasBot system startup completed successfully![0m
+[0;36m[2025-08-24 18:45:45] [INFO] 📊 Checking system status...[0m
+[0;36m[2025-08-24 18:45:45] [INFO] 📊 Generating system status report...[0m
+
+[0;34m╔══════════════════════════════════════════════╗[0m
+[0;34m║                System Status                 ║[0m
+[0;34m╚══════════════════════════════════════════════╝[0m
+
+[0;36mOperation Mode:[0m FULL
+[0;36mOrchestrator State:[0m INITIALIZING
+[0;36mRuntime:[0m 0 seconds
+
+[1;33mService Status:[0m
+
+[1;33mService URLs:[0m
+  🤖 CanvasBot API: http://localhost:3001
+  🌐 Open WebUI: http://localhost:8081
+  ⚡ vLLM API: http://localhost:8000
+  🧠 Ollama API: http://localhost:11435
+
+[0;31m⚠️ Critical Issues Detected:[0m
+  ❌ Canvas access token not configured
+
+[1;33m💡 Troubleshooting Steps:[0m
+  1. Check logs: [0;36mtail -f /home/bencan/projects/canvasCheckerBot/logs/orchestrator.log[0m
+  2. Restart services: [0;36m./manage.sh restart[0m
+  3. Check configuration: [0;36m./manage.sh validate[0m
+[0;36m[2025-08-24 18:46:30] [INFO] 📊 Checking system status...[0m
+[0;36m[2025-08-24 18:46:30] [INFO] 📊 Generating system status report...[0m
+
+[0;34m╔══════════════════════════════════════════════╗[0m
+[0;34m║                System Status                 ║[0m
+[0;34m╚══════════════════════════════════════════════╝[0m
+
+[0;36mOperation Mode:[0m FULL
+[0;36mOrchestrator State:[0m INITIALIZING
+[0;36mRuntime:[0m 0 seconds
+
+[1;33mService Status:[0m
+
+[1;33mService URLs:[0m
+  🤖 CanvasBot API: http://localhost:3001
+  🌐 Open WebUI: http://localhost:8081
+  ⚡ vLLM API: http://localhost:8000
+  🧠 Ollama API: http://localhost:11435
+
+[0;31m⚠️ Critical Issues Detected:[0m
+  ❌ Canvas access token not configured
+
+[1;33m💡 Troubleshooting Steps:[0m
+  1. Check logs: [0;36mtail -f /home/bencan/projects/canvasCheckerBot/logs/orchestrator.log[0m
+  2. Restart services: [0;36m./manage.sh restart[0m
+  3. Check configuration: [0;36m./manage.sh validate[0m
+[0;36m[2025-08-24 18:47:24] [INFO] 📊 Checking system status...[0m
+[0;36m[2025-08-24 18:47:24] [INFO] 📊 Generating system status report...[0m
+
+[0;34m╔══════════════════════════════════════════════╗[0m
+[0;34m║                System Status                 ║[0m
+[0;34m╚══════════════════════════════════════════════╝[0m
+
+[0;36mOperation Mode:[0m FULL
+[0;36mOrchestrator State:[0m INITIALIZING
+[0;36mRuntime:[0m 0 seconds
+
+[1;33mService Status:[0m
+
+[1;33mService URLs:[0m
+  🤖 CanvasBot API: http://localhost:3001
+  🌐 Open WebUI: http://localhost:8081
+  ⚡ vLLM API: http://localhost:8000
+  🧠 Ollama API: http://localhost:11435
+
+[0;32m✅ No critical issues detected[0m
+[0;36m[2025-08-24 18:48:08] [INFO] 📊 Checking system status...[0m
+[0;36m[2025-08-24 18:48:08] [INFO] 📊 Generating system status report...[0m
+
+[0;34m╔══════════════════════════════════════════════╗[0m
+[0;34m║                System Status                 ║[0m
+[0;34m╚══════════════════════════════════════════════╝[0m
+
+[0;36mOperation Mode:[0m FULL
+[0;36mOrchestrator State:[0m INITIALIZING
+[0;36mRuntime:[0m 0 seconds
+
+[1;33mService Status:[0m
+
+[1;33mService URLs:[0m
+  🤖 CanvasBot API: http://localhost:3001
+  🌐 Open WebUI: http://localhost:8081
+  ⚡ vLLM API: http://localhost:8000
+  🧠 Ollama API: http://localhost:11435
+
+[0;32m✅ No critical issues detected[0m
+[0;36m[2025-08-24 18:51:28] [INFO] 📊 Checking system status...[0m
+[0;36m[2025-08-24 18:51:28] [INFO] 📊 Generating system status report...[0m
+
+[0;34m╔══════════════════════════════════════════════╗[0m
+[0;34m║                System Status                 ║[0m
+[0;34m╚══════════════════════════════════════════════╝[0m
+
+[0;36mOperation Mode:[0m FULL
+[0;36mOrchestrator State:[0m READY
+[0;36mRuntime:[0m 0 seconds
+
+[1;33mService Status:[0m
+  ✅ ollama: HEALTHY (HEALTHY)
+  ✅ vllm: HEALTHY (HEALTHY)
+  ✅ canvasbot: HEALTHY (HEALTHY)
+  ✅ open-webui: HEALTHY (HEALTHY)
+
+[1;33mService URLs:[0m
+  🤖 CanvasBot API: http://localhost:3001
+  🌐 Open WebUI: http://localhost:8081
+  ⚡ vLLM API: http://localhost:8000
+  🧠 Ollama API: http://localhost:11435
+
+[0;32m✅ No critical issues detected[0m
+[0;36m[2025-08-24 18:51:45] [INFO] 📊 Checking system status...[0m
+[0;36m[2025-08-24 18:51:45] [INFO] 📊 Generating system status report...[0m
+
+[0;34m╔══════════════════════════════════════════════╗[0m
+[0;34m║                System Status                 ║[0m
+[0;34m╚══════════════════════════════════════════════╝[0m
+
+[0;36mOperation Mode:[0m FULL
+[0;36mOrchestrator State:[0m READY
+[0;36mRuntime:[0m 0 seconds
+
+[1;33mService Status:[0m
+  ✅ ollama: HEALTHY (HEALTHY)
+  ✅ vllm: HEALTHY (HEALTHY)
+  ✅ canvasbot: HEALTHY (HEALTHY)
+  ✅ open-webui: HEALTHY (HEALTHY)
+
+[1;33mService URLs:[0m
+  🤖 CanvasBot API: http://localhost:3001
+  🌐 Open WebUI: http://localhost:8081
+  ⚡ vLLM API: http://localhost:8000
+  🧠 Ollama API: http://localhost:11435
+
+[0;32m✅ No critical issues detected[0m
+[0;36m[2025-08-24 18:52:52] [INFO] 📊 Checking system status...[0m
+[0;36m[2025-08-24 18:52:52] [INFO] 📊 Generating system status report...[0m
+
+[0;34m╔══════════════════════════════════════════════╗[0m
+[0;34m║                System Status                 ║[0m
+[0;34m╚══════════════════════════════════════════════╝[0m
+
+[0;36mOperation Mode:[0m FULL
+[0;36mOrchestrator State:[0m READY
+[0;36mRuntime:[0m 17m 56s
+
+[1;33mService Status:[0m
+  ✅ ollama: HEALTHY (HEALTHY)
+  ✅ vllm: HEALTHY (HEALTHY)
+  ✅ canvasbot: HEALTHY (HEALTHY)
+  ✅ open-webui: HEALTHY (HEALTHY)
+
+[1;33mService URLs:[0m
+  🤖 CanvasBot API: http://localhost:3001
+  🌐 Open WebUI: http://localhost:8081
+  ⚡ vLLM API: http://localhost:8000
+  🧠 Ollama API: http://localhost:11435
+
+[0;32m✅ No critical issues detected[0m
+[0;36m[2025-08-24 18:54:28] [INFO] 🛑 Stopping CanvasBot system...[0m
+[0;36m[2025-08-24 18:54:28] [INFO] 🛑 Initiating graceful shutdown...[0m
+[0;36m[2025-08-24 18:54:28] [INFO] 🧹 Cleaning up orchestrator state...[0m
+[0;32m[2025-08-24 18:54:28] [SUCCESS] ✅ Graceful shutdown completed[0m
+[0;36m[2025-08-24 18:54:38] [INFO] 📊 Checking system status...[0m
+[0;36m[2025-08-24 18:54:38] [INFO] 📊 Generating system status report...[0m
+
+[0;34m╔══════════════════════════════════════════════╗[0m
+[0;34m║                System Status                 ║[0m
+[0;34m╚══════════════════════════════════════════════╝[0m
+
+[0;36mOperation Mode:[0m FULL
+[0;36mOrchestrator State:[0m READY
+[0;36mRuntime:[0m 19m 42s
+
+[1;33mService Status:[0m
+  ✅ ollama: HEALTHY (HEALTHY)
+  ✅ vllm: HEALTHY (HEALTHY)
+  ✅ canvasbot: HEALTHY (HEALTHY)
+  ✅ open-webui: HEALTHY (HEALTHY)
+
+[1;33mService URLs:[0m
+  🤖 CanvasBot API: http://localhost:3001
+  🌐 Open WebUI: http://localhost:8081
+  ⚡ vLLM API: http://localhost:8000
+  🧠 Ollama API: http://localhost:11435
+
+[0;32m✅ No critical issues detected[0m
+[0;36m[2025-08-24 18:57:16] [INFO] 🛑 Stopping CanvasBot system...[0m
+[0;36m[2025-08-24 18:57:16] [INFO] 🛑 Initiating graceful shutdown...[0m
+[0;36m[2025-08-24 18:57:16] [INFO] 🧹 Cleaning up orchestrator state...[0m
+[0;32m[2025-08-24 18:57:16] [SUCCESS] ✅ Graceful shutdown completed[0m
+[0;36m[2025-08-24 18:57:47] [INFO] 🛑 Stopping CanvasBot system...[0m
+[0;36m[2025-08-24 18:57:47] [INFO] 🛑 Initiating graceful shutdown...[0m
+./manage.sh: line 678: CONTAINER_NAMES: unbound variable
+[0;36m[2025-08-24 18:57:59] [INFO] 🛑 Stopping CanvasBot system...[0m
+[0;36m[2025-08-24 18:57:59] [INFO] 🛑 Initiating graceful shutdown...[0m
+[0;36m[2025-08-24 18:57:59] [INFO] 🛑 Stopping open-webui...[0m
+[0;36m[2025-08-24 18:57:59] [INFO] 🛑 Stopping open-webui container...[0m
+[0;32m[2025-08-24 18:58:01] [SUCCESS] ✅ open-webui stopped gracefully[0m
+[0;36m[2025-08-24 18:58:01] [INFO] 🛑 Stopping canvasbot...[0m
+[0;36m[2025-08-24 18:58:01] [INFO] 🛑 Stopping canvasbot container...[0m
+[0;32m[2025-08-24 18:58:31] [SUCCESS] ✅ canvasbot stopped gracefully[0m
+[0;36m[2025-08-24 18:58:31] [INFO] 🛑 Stopping vllm...[0m
+[0;36m[2025-08-24 18:58:31] [INFO] 🛑 Stopping vllm container...[0m
+[0;32m[2025-08-24 18:58:36] [SUCCESS] ✅ vllm stopped gracefully[0m
+[0;36m[2025-08-24 18:58:36] [INFO] 🛑 Stopping ollama...[0m
+[0;36m[2025-08-24 18:58:36] [INFO] 🛑 Stopping ollama container...[0m
+[0;32m[2025-08-24 18:58:36] [SUCCESS] ✅ ollama stopped gracefully[0m
+[0;36m[2025-08-24 18:58:36] [INFO] 🧹 Cleaning up orchestrator state...[0m
+[0;32m[2025-08-24 18:58:36] [SUCCESS] ✅ Graceful shutdown completed[0m

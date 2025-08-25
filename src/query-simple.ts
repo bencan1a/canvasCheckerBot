@@ -150,6 +150,6 @@ async function main() {
   rl.close();
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (typeof require !== 'undefined' && (require as any).main === module) {
   main().catch(console.error);
 }
